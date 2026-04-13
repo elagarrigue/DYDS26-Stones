@@ -32,7 +32,34 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 - Existe un inventario explícito y revisable con archivo -> responsabilidad principal.
 - Se identifican al menos: `Movie`, `MoviesViewModel`, `MoviesDependencyInjector`, `HomeScreen`, `DetailScreen`, `Navigation`, `CommonComposables`, `App.kt`, `main.kt`.
 
-**Estado:** PENDIENTE
+**Inventario actual (archivo/símbolo -> responsabilidad principal)**
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/Movie.kt`
+  - `Movie`: modelo de dominio usado por UI.
+  - `QualifiedMovie`: wrapper para clasificar película "buena/mala" en UI.
+  - `RemoteMovie`, `RemoteResult`: modelos remotos serializables de TMDB.
+  - `toDomainMovie()`: mapper de remoto a dominio.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/MoviesViewModel.kt`
+  - `MoviesViewModel`: coordina carga de populares/detalle, estado de UI y cache en memoria.
+  - `MoviesUiState`, `MovieDetailUiState`: estados observables consumidos por pantallas.
+  - Aplica orden por `voteAverage` y regla de clasificación con `MIN_VOTE_AVERAGE`.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/MoviesDependencyInjector.kt`
+  - `MoviesDependencyInjector`: crea/configura `HttpClient` (JSON, timeout, API key) y provee `MoviesViewModel` para Compose.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/HomeScreen.kt`
+  - `HomeScreen`: dispara carga inicial, observa listado y decide entre loading/resultados/sin resultados.
+  - `MovieGrid`, `GoodMovieItem`, `BadMovieItem`: render de grilla, navegación a detalle y diálogo para películas no recomendadas.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/DetailScreen.kt`
+  - `DetailScreen`: solicita detalle por id, observa estado y muestra loading/detalle/reintento.
+  - `MovieDetail`, `DetailTopBar`: composición de detalle, metadata y navegación de regreso.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/Navigation.kt`
+  - `Navigation`: define `NavHost` con rutas `home` y `detail/{movieId}` y cablea eventos entre pantallas.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/CommonComposables.kt`
+  - `LoadingIndicator`, `NoResults`: componentes UI reutilizables para carga y estado vacío con retry.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/App.kt`
+  - `App`: raíz composable de la aplicación, delega en `Navigation`.
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/main.kt`
+  - `main()`: entrypoint desktop Compose; crea ventana y monta `App`.
+
+**Estado:** COMPLETADO (inventario validado el 2026-04-12)
 
 ### 2) Definir mapa destino por capas y reglas de ubicación
 
@@ -132,6 +159,6 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 
 ## Bitácora de ejecución incremental
 
-- Iteración actual: PLAN creado, esperando aprobación para ejecutar **solo el Paso 1**.
+- Iteración actual: **Paso 1 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 2**.
 - Regla activa: no avanzar al siguiente paso sin confirmación explícita del usuario.
 
