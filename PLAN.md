@@ -75,11 +75,44 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
   - `presentation/App.kt`
 - Definir reglas de pertenencia por capa (qué puede depender de qué).
 
-**Criterio de validación**
-- Existe tabla/decisión clara de "archivo actual -> destino".
-- No hay ambigüedad en responsabilidades de cada carpeta.
+**Mapa actual -> destino (archivo/símbolo)**
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/Movie.kt`
+  - `Movie` -> `domain/entity/Movie.kt`
+  - `QualifiedMovie` -> `presentation/home/QualifiedMovie.kt`
+  - `RemoteMovie`, `RemoteResult`, `toDomainMovie()` -> `data`
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/MoviesViewModel.kt`
+  - `MoviesViewModel` actual se divide en:
+    - `HomeViewModel` + `MoviesUiState` -> `presentation/home`
+    - `DetailViewModel` + `MovieDetailUiState` -> `presentation/detail`
+  - Llamadas HTTP/capa remota/caché -> se extraen a `data` y `domain` en pasos 3-4 (sin cambio funcional)
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/MoviesDependencyInjector.kt`
+  - `MoviesDependencyInjector` -> `di/MoviesDependencyInjector.kt`
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/HomeScreen.kt`
+  - `HomeScreen` -> `presentation/home/HomeScreen.kt`
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/DetailScreen.kt`
+  - `DetailScreen` -> `presentation/detail/DetailScreen.kt`
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/CommonComposables.kt`
+  - `CommonComposables` -> `presentation/utils/CommonComposables.kt`
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/Navigation.kt`
+  - `Navigation` -> `presentation/Navigation.kt`
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/App.kt`
+  - `App` -> `presentation/App.kt`
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/main.kt`
+  - `main.kt` permanece en `edu.dyds.movies`
 
-**Estado:** PENDIENTE
+**Reglas de dependencia por capa (verificables por imports)**
+- `domain/*` solo depende de `domain/*` y librería estándar.
+- `data/*` puede depender de `domain/entity` y `domain/repository`, nunca de `presentation/*`.
+- `presentation/*` puede depender de `domain/*`, nunca de implementaciones concretas de `data/*`.
+- `di/*` centraliza ensamblado y puede conocer `data/*`, `domain/*` y `presentation/*` para cableado.
+- `main.kt` solo arranca la app y delega en `presentation/App.kt`.
+
+**Criterio de validación**
+- Existe mapa explícito y no ambiguo de "archivo/símbolo actual -> destino".
+- Cada carpeta objetivo tiene responsabilidad definida y sin solape.
+- Reglas de dependencia permitida/prohibida expresadas y auditables por imports.
+
+**Estado:** COMPLETADO (mapa y reglas definidos el 2026-04-12)
 
 ### 3) Crear estructura de carpetas y mover `domain` (entity/repository/usecase)
 
@@ -159,6 +192,5 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 
 ## Bitácora de ejecución incremental
 
-- Iteración actual: **Paso 1 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 2**.
+- Iteración actual: **Paso 2 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 3**.
 - Regla activa: no avanzar al siguiente paso sin confirmación explícita del usuario.
-
