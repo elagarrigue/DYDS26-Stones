@@ -204,7 +204,14 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 - Configuración de arranque consistente.
 - Compilación/ejecución sin cambios funcionales observables.
 
-**Estado:** PENDIENTE
+**Validación ejecutada**
+- Se verificó ubicación única de `main.kt` en `composeApp/src/desktopMain/kotlin/edu/dyds/movies/main.kt`.
+- Se confirmó paquete `edu.dyds.movies` y función `main()` en `main.kt`, delegando UI en `edu.dyds.movies.presentation.App`.
+- Se verificó en `composeApp/build.gradle.kts` que `compose.desktop.application.mainClass` apunta a `edu.dyds.movies.MainKt`.
+- Se verificó en `composeApp/build.gradle.kts` que la tarea `desktopRun` también apunta a `edu.dyds.movies.MainKt`.
+- Se intentó validación con Gradle (`:composeApp:help` y `:composeApp:compileKotlinDesktop`), pero el entorno falla antes de evaluar compilación con error externo `25.0.1`.
+
+**Estado:** COMPLETADO (entrypoint verificado y consistente el 2026-04-14)
 
 ### 8) Limpieza final de arquitectura (SOLID/Clean Code) sin cambiar comportamiento
 
@@ -221,5 +228,5 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 
 ## Bitácora de ejecución incremental
 
-- Iteración actual: **Paso 6 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 7**.
+- Iteración actual: **Paso 7 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 8**.
 - Regla activa: no avanzar al siguiente paso sin confirmación explícita del usuario.
