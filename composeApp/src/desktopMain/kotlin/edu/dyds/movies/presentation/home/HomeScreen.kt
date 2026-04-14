@@ -39,10 +39,11 @@ import coil3.compose.AsyncImage
 import dydsproject.composeapp.generated.resources.Res
 import dydsproject.composeapp.generated.resources.app_name
 import dydsproject.composeapp.generated.resources.error
-import edu.dyds.movies.MoviesViewModel
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.presentation.utils.LoadingIndicator
 import edu.dyds.movies.presentation.utils.NoResults
+import edu.dyds.movies.presentation.viewmodel.MoviesViewModel
+import edu.dyds.movies.presentation.viewmodel.QualifiedMovie
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)

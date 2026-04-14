@@ -2,11 +2,11 @@ package edu.dyds.movies.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.dyds.movies.MoviesViewModel
 import edu.dyds.movies.data.local.InMemoryMoviesLocalDataSource
 import edu.dyds.movies.data.repository.TmdbMoviesRepository
 import edu.dyds.movies.domain.usecase.GetMovieDetailUseCase
 import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
+import edu.dyds.movies.presentation.viewmodel.MoviesViewModel
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
