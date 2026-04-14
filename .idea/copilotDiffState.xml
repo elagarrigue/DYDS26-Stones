@@ -21,14 +21,6 @@
             </PendingDiffInfo>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/composeApp/src/desktopMain/kotlin/edu/dyds/movies/domain/usecase/GetPopularMoviesUseCase.kt">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/composeApp/src/desktopMain/kotlin/edu/dyds/movies/domain/usecase/GetPopularMoviesUseCase.kt" />
-              <option name="updatedContent" value="package edu.dyds.movies.domain.usecase&#10;&#10;import edu.dyds.movies.domain.entity.Movie&#10;import edu.dyds.movies.domain.repository.MoviesRepository&#10;&#10;class GetPopularMoviesUseCase(&#10;    private val moviesRepository: MoviesRepository,&#10;) {&#10;    suspend operator fun invoke(): List&lt;Movie&gt; = moviesRepository.getAllMovies()&#10;}&#10;" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
       </map>
     </option>
   </component>
