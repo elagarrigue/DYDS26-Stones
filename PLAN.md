@@ -6,7 +6,7 @@ Este documento define una guía reutilizable para ejecutar una refactorización 
 
 Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y Clean Code, sin introducir cambios funcionales en esta etapa:
 
-- `data`: solo datos persistentes/infraestructura de datos.
+- `data`: infraestructura de datos dividida en `external` (fuentes externas) y `local` (cache/persistencia local), incluyendo la implementación concreta de los repositorios definidos en `domain/repository`.
 - `di`: ensamblado de dependencias.
 - `domain`: lógica de negocio (`entity`, `repository`, `usecase`).
 - `presentation`: lógica de interfaz (`detail`, `home`, `utils`) y `App.kt`.
@@ -64,7 +64,9 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 ### 2) Definir mapa destino por capas y reglas de ubicación
 
 - Establecer el árbol objetivo en `edu.dyds.movies`:
-  - `data`
+  - `data/external`
+  - `data/local`
+  - `data/repository`
   - `di`
   - `domain/entity`
   - `domain/repository`
@@ -79,12 +81,14 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 - `composeApp/src/desktopMain/kotlin/edu/dyds/movies/Movie.kt`
   - `Movie` -> `domain/entity/Movie.kt`
   - `QualifiedMovie` -> `presentation/home/QualifiedMovie.kt`
-  - `RemoteMovie`, `RemoteResult`, `toDomainMovie()` -> `data`
+  - `RemoteMovie`, `RemoteResult`, `toDomainMovie()` -> `data/external` (modelos) y `data/external` o `data/repository` (mappers según uso)
 - `composeApp/src/desktopMain/kotlin/edu/dyds/movies/MoviesViewModel.kt`
   - `MoviesViewModel` actual se divide en:
     - `HomeViewModel` + `MoviesUiState` -> `presentation/home`
     - `DetailViewModel` + `MovieDetailUiState` -> `presentation/detail`
-  - Llamadas HTTP/capa remota/caché -> se extraen a `data` y `domain` en pasos 3-4 (sin cambio funcional)
+  - Llamadas HTTP/capa remota/caché -> se extraen a `data/external`, `data/local` y `data/repository` en pasos 3-4 (sin cambio funcional)
+- `composeApp/src/desktopMain/kotlin/edu/dyds/movies/domain/repository/MoviesRepository.kt`
+  - Contrato se mantiene en `domain/repository`; su implementación concreta vive en `data/repository`.
 - `composeApp/src/desktopMain/kotlin/edu/dyds/movies/MoviesDependencyInjector.kt`
   - `MoviesDependencyInjector` -> `di/MoviesDependencyInjector.kt`
 - `composeApp/src/desktopMain/kotlin/edu/dyds/movies/HomeScreen.kt`
@@ -102,7 +106,8 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 
 **Reglas de dependencia por capa (verificables por imports)**
 - `domain/*` solo depende de `domain/*` y librería estándar.
-- `data/*` puede depender de `domain/entity` y `domain/repository`, nunca de `presentation/*`.
+- `data/external/*` y `data/local/*` manejan acceso a fuentes de datos y nunca dependen de `presentation/*`.
+- `data/repository/*` implementa contratos de `domain/repository/*` y puede orquestar `data/external/*` y `data/local/*`.
 - `presentation/*` puede depender de `domain/*`, nunca de implementaciones concretas de `data/*`.
 - `di/*` centraliza ensamblado y puede conocer `data/*`, `domain/*` y `presentation/*` para cableado.
 - `main.kt` solo arranca la app y delega en `presentation/App.kt`.
@@ -130,15 +135,26 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 
 ### 4) Mover capa `data` (persistencia/infraestructura de datos)
 
-- Reubicar modelos remotos, resultados de API, mappers y acceso a datos en `data`.
+- Crear estructura `data/external` y `data/local`.
+- Reubicar modelos remotos, resultados de API y acceso HTTP en `data/external`.
+- Reubicar cache/persistencia local en `data/local`.
+- Implementar en `data/repository` los contratos definidos en `domain/repository` (por ejemplo `MoviesRepository`).
 - Mantener interoperabilidad con `domain` vía contratos/mappers.
 
 **Criterio de validación**
+- Existen `data/external`, `data/local` y `data/repository` con responsabilidades claras y sin solape.
+- `data/repository` contiene la implementación concreta de `domain/repository`.
 - `data` contiene solo componentes de acceso/persistencia de datos.
 - No hay dependencias directas desde `domain` hacia `presentation`.
 - Compilación exitosa después del ajuste de imports.
 
-**Estado:** PENDIENTE
+**Validación ejecutada**
+- Se crearon y usaron `data/external`, `data/local` y `data/repository`.
+- `TmdbMoviesRepository` implementa `MoviesRepository` y orquesta external/local.
+- `get_errors` sin errores en los archivos modificados del paso.
+- Compilación Gradle no ejecutada en esta iteración (omitida por preferencia del usuario).
+
+**Estado:** COMPLETADO (estructura `data` en `external/local/repository` e implementación concreta de repositorio aplicada el 2026-04-14)
 
 ### 5) Mover `di` y centralizar instanciación de dependencias
 
@@ -192,5 +208,5 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 
 ## Bitácora de ejecución incremental
 
-- Iteración actual: **Paso 3 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 4**.
+- Iteración actual: **Paso 4 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 5**.
 - Regla activa: no avanzar al siguiente paso sin confirmación explícita del usuario.
