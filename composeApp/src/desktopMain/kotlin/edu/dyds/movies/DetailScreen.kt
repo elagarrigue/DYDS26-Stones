@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import dydsproject.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
+import edu.dyds.movies.domain.entity.Movie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

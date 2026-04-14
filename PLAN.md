@@ -126,7 +126,7 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 - Entidades de negocio no quedan mezcladas con UI o networking.
 - Compila tras ajustar imports (si aplica en este paso).
 
-**Estado:** PENDIENTE
+**Estado:** COMPLETADO (estructura `domain` creada y entidades/contratos base movidos el 2026-04-14)
 
 ### 4) Mover capa `data` (persistencia/infraestructura de datos)
 
@@ -192,5 +192,5 @@ Reorganizar `edu.dyds.movies` en una arquitectura por capas, respetando SOLID y 
 
 ## Bitácora de ejecución incremental
 
-- Iteración actual: **Paso 2 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 3**.
+- Iteración actual: **Paso 3 completado**. Esperando aprobación explícita para ejecutar **solo el Paso 4**.
 - Regla activa: no avanzar al siguiente paso sin confirmación explícita del usuario.

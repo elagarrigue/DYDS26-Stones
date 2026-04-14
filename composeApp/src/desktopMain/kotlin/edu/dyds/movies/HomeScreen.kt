@@ -23,6 +23,7 @@ import dydsproject.composeapp.generated.resources.Res
 import dydsproject.composeapp.generated.resources.app_name
 import dydsproject.composeapp.generated.resources.error
 import org.jetbrains.compose.resources.stringResource
+import edu.dyds.movies.domain.entity.Movie
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

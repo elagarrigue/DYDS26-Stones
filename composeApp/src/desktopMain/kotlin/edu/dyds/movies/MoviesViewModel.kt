@@ -99,6 +99,6 @@ class MoviesViewModel(
 
     data class MovieDetailUiState(
         val isLoading: Boolean = false,
-        val movie: Movie? = null,
+        val movie: edu.dyds.movies.domain.entity.Movie? = null,
     )
 }
