@@ -10,7 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import edu.dyds.movies.MoviesDependencyInjector.getMoviesViewModel
+import edu.dyds.movies.di.MoviesDependencyInjector.getMoviesViewModel
 
 private const val HOME = "home"
 

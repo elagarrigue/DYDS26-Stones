@@ -1,7 +1,8 @@
-package edu.dyds.movies
+package edu.dyds.movies.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.dyds.movies.MoviesViewModel
 import edu.dyds.movies.data.local.InMemoryMoviesLocalDataSource
 import edu.dyds.movies.data.repository.TmdbMoviesRepository
 import edu.dyds.movies.domain.usecase.GetMovieDetailUseCase
