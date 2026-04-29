@@ -7,7 +7,8 @@ import edu.dyds.movies.data.remote.RemoteMoviesDataSourceImpl
 import edu.dyds.movies.data.repository.MoviesRepositoryImpl
 import edu.dyds.movies.domain.usecase.GetMovieDetailUseCase
 import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
-import edu.dyds.movies.presentation.viewmodel.MoviesViewModel
+import edu.dyds.movies.presentation.viewmodel.DetailViewModel
+import edu.dyds.movies.presentation.viewmodel.HomeViewModel
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -43,14 +44,26 @@ object MoviesDependencyInjector {
     private val remoteDataSource = RemoteMoviesDataSourceImpl(tmdbHttpClient)
 
     @Composable
-    fun getMoviesViewModel(): MoviesViewModel {
+    fun getHomeViewModel(): HomeViewModel {
         return viewModel {
             val moviesRepository = MoviesRepositoryImpl(
                 remoteDataSource = remoteDataSource,
                 localDataSource = localDataSource
             )
-            MoviesViewModel(
-                getPopularMoviesUseCase = GetPopularMoviesUseCase(moviesRepository),
+            HomeViewModel(
+                getPopularMoviesUseCase = GetPopularMoviesUseCase(moviesRepository)
+            )
+        }
+    }
+
+    @Composable
+    fun getDetailViewModel(): DetailViewModel {
+        return viewModel {
+            val moviesRepository = MoviesRepositoryImpl(
+                remoteDataSource = remoteDataSource,
+                localDataSource = localDataSource
+            )
+            DetailViewModel(
                 getMovieDetailUseCase = GetMovieDetailUseCase(moviesRepository)
             )
         }

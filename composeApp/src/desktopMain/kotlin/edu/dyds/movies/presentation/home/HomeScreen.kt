@@ -32,24 +32,24 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import coil3.compose.AsyncImage
 import dydsproject.composeapp.generated.resources.Res
 import dydsproject.composeapp.generated.resources.app_name
 import dydsproject.composeapp.generated.resources.error
+import androidx.compose.ui.res.painterResource
 import edu.dyds.movies.domain.entity.Movie
+import edu.dyds.movies.domain.entity.QualifiedMovie
 import edu.dyds.movies.presentation.utils.LoadingIndicator
 import edu.dyds.movies.presentation.utils.NoResults
-import edu.dyds.movies.presentation.viewmodel.MoviesViewModel
-import edu.dyds.movies.presentation.viewmodel.QualifiedMovie
+import edu.dyds.movies.presentation.viewmodel.HomeViewModel
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-	viewModel: MoviesViewModel,
+	viewModel: HomeViewModel,
 	onGoodMovieClick: (Movie) -> Unit
 ) {
 
@@ -57,7 +57,7 @@ fun HomeScreen(
 		viewModel.getAllMovies()
 	}
 
-	val state by viewModel.moviesStateFlow.collectAsState(MoviesViewModel.MoviesUiState())
+	val state by viewModel.homeStateFlow.collectAsState(HomeViewModel.HomeUiState())
 
 	MaterialTheme {
 		Surface {
