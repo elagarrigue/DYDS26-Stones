@@ -5,8 +5,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.dyds.movies.data.local.InMemoryMoviesLocalDataSource
 import edu.dyds.movies.data.remote.RemoteMoviesDataSourceImpl
 import edu.dyds.movies.data.repository.MoviesRepositoryImpl
-import edu.dyds.movies.domain.usecase.GetMovieDetailUseCase
-import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
+import edu.dyds.movies.domain.usecase.GetMovieDetailUseCaseImpl
+import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCaseImpl
 import edu.dyds.movies.presentation.viewmodel.DetailViewModel
 import edu.dyds.movies.presentation.viewmodel.HomeViewModel
 import io.ktor.client.*
@@ -51,7 +51,7 @@ object MoviesDependencyInjector {
                 localDataSource = localDataSource
             )
             HomeViewModel(
-                getPopularMoviesUseCase = GetPopularMoviesUseCase(moviesRepository)
+                getPopularMoviesUseCase = GetPopularMoviesUseCaseImpl(moviesRepository)
             )
         }
     }
@@ -64,7 +64,7 @@ object MoviesDependencyInjector {
                 localDataSource = localDataSource
             )
             DetailViewModel(
-                getMovieDetailUseCase = GetMovieDetailUseCase(moviesRepository)
+                getMovieDetailUseCase = GetMovieDetailUseCaseImpl(moviesRepository)
             )
         }
     }
