@@ -6,9 +6,10 @@ import edu.dyds.movies.data.local.InMemoryMoviesLocalDataSource
 import edu.dyds.movies.data.remote.RemoteMoviesDataSourceImpl
 import edu.dyds.movies.data.repository.MoviesRepositoryImpl
 import edu.dyds.movies.domain.usecase.GetMovieDetailUseCaseImpl
+import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
 import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCaseImpl
-import edu.dyds.movies.presentation.viewmodel.DetailViewModel
-import edu.dyds.movies.presentation.viewmodel.HomeViewModel
+import edu.dyds.movies.presentation.detail.DetailViewModel
+import edu.dyds.movies.presentation.home.HomeViewModel
 import io.ktor.client.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
