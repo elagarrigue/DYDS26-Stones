@@ -2,7 +2,7 @@ package edu.dyds.movies.data.local
 
 import edu.dyds.movies.domain.entity.Movie
 
-class InMemoryMoviesLocalDataSource : MoviesLocalDataSource {
+class MoviesLocalDataSourceImpl : MoviesLocalDataSource {
 
 	private val cachedMovies = mutableListOf<Movie>()
 
@@ -13,9 +13,6 @@ class InMemoryMoviesLocalDataSource : MoviesLocalDataSource {
 		cachedMovies.addAll(movies)
 	}
 
-	override fun getMovies(): List<Movie> {
-		return cachedMovies
-	}
 
 	override fun getMovieDetail(id: Int): Movie? {
 		return cachedMovies.firstOrNull { it.id == id }

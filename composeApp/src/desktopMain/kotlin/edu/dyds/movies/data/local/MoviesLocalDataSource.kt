@@ -7,5 +7,5 @@ interface MoviesLocalDataSource {
 	fun savePopularMovies(movies: List<Movie>)
 	fun getMovieDetail(id: Int): Movie?
 	fun saveMovieDetail(movie: Movie, index: Int)
-	fun getMovies(): List<Movie>
+
 }
