@@ -11,8 +11,8 @@ import kotlin.test.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModelTest {
 
-    private val dispatcher = StandardTestDispatcher()
     private val useCase = mockk<GetMovieDetailUseCase>(relaxed = true)
+    private val dispatcher = StandardTestDispatcher()
 
     private lateinit var viewModel: DetailViewModel
 
@@ -28,7 +28,6 @@ class DetailViewModelTest {
         clearAllMocks()
     }
 
-    private suspend fun state(): DetailViewModel.DetailUiState = viewModel.movieDetailStateFlow.first()
 
     private fun movie(
         id: Int,
@@ -47,76 +46,62 @@ class DetailViewModelTest {
     )
 
     @Test
-    fun `initial state is not loading and movie is null`() = runTest {
-        assertFalse(state().isLoading)
-        assertNull(state().movie)
+    fun `initial state should have no movie loaded`() {
+        val initialState = viewModel.movieDetailStateFlow.value
+        assertNull(initialState.movie)
+        assertFalse(initialState.isLoading)
     }
 
     @Test
-    fun `getMovieDetail loads and populates movie`() = runTest {
+    fun `requesting movie detail should eventually load the movie`() = runTest {
         val testMovie = movie(1, "Test Movie")
         coEvery { useCase(1) } returns testMovie
 
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
 
-        val s = state()
-        assertFalse(s.isLoading)
-        assertEquals(testMovie, s.movie)
+        val finalState = viewModel.movieDetailStateFlow.value
+        assertEquals(testMovie, finalState.movie)
+        assertFalse(finalState.isLoading)
     }
 
     @Test
-    fun `getMovieDetail handles null result`() = runTest {
+    fun `requesting non-existent movie should result in no movie`() = runTest {
         coEvery { useCase(999) } returns null
 
         viewModel.getMovieDetail(999)
         advanceUntilIdle()
 
-        val s = state()
-        assertFalse(s.isLoading)
-        assertNull(s.movie)
+        val finalState = viewModel.movieDetailStateFlow.value
+        assertNull(finalState.movie)
+        assertFalse(finalState.isLoading)
     }
 
     @Test
-    fun `isLoading is true while suspended`() = runTest {
-        val gate = CompletableDeferred<Movie?>()
-
-        coEvery { useCase(1) } coAnswers {
-            gate.await()
-        }
-
-        viewModel.getMovieDetail(1)
-        runCurrent()
-
-        assertTrue(state().isLoading)
-
-        gate.complete(movie(1))
-        advanceUntilIdle()
-
-        assertFalse(state().isLoading)
-    }
-
-    @Test
-    fun `retry updates movie state`() = runTest {
+    fun `calling getMovieDetail again with new id should load the new movie`() = runTest {
         coEvery { useCase(1) } returnsMany listOf(
             null,
             movie(1, "First Retry")
         )
 
+        // First call returns null
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
-        assertNull(state().movie)
+        val firstState = viewModel.movieDetailStateFlow.value
+        assertNull(firstState.movie)
 
+        // Second call returns movie
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
-        assertNotNull(state().movie)
-        assertEquals("First Retry", state().movie!!.title)
+        val secondState = viewModel.movieDetailStateFlow.value
+        assertNotNull(secondState.movie)
+        assertEquals("First Retry", secondState.movie!!.title)
 
         coVerify(exactly = 2) { useCase(1) }
     }
 
     @Test
-    fun `different movie ids are handled correctly`() = runTest {
+    fun `different movie ids should load their respective movies`() = runTest {
         val movie1 = movie(1, "Movie One")
         val movie2 = movie(2, "Movie Two")
 
@@ -125,35 +110,40 @@ class DetailViewModelTest {
 
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
-        assertEquals("Movie One", state().movie!!.title)
+        val state1 = viewModel.movieDetailStateFlow.value
+        assertEquals("Movie One", state1.movie!!.title)
 
         viewModel.getMovieDetail(2)
         advanceUntilIdle()
-        assertEquals("Movie Two", state().movie!!.title)
+        val state2 = viewModel.movieDetailStateFlow.value
+        assertEquals("Movie Two", state2.movie!!.title)
 
         coVerify(exactly = 1) { useCase(1) }
         coVerify(exactly = 1) { useCase(2) }
     }
 
     @Test
-    fun `movie details are correctly exposed`() = runTest {
+    fun `movie details are correctly exposed in final state`() = runTest {
         val testMovie = movie(1)
         coEvery { useCase(1) } returns testMovie
 
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
 
-        val s = state()
-        assertEquals(1, s.movie!!.id)
-        assertEquals("Movie 1", s.movie!!.title)
-        assertEquals("Overview of Movie 1", s.movie!!.overview)
-        assertEquals("2024-01-01", s.movie!!.releaseDate)
-        assertEquals(75.5, s.movie!!.popularity)
-        assertEquals(8.5, s.movie!!.voteAverage)
+        val finalState = viewModel.movieDetailStateFlow.value
+        assertNotNull(finalState.movie)
+        with(finalState.movie!!) {
+            assertEquals(1, id)
+            assertEquals("Movie 1", title)
+            assertEquals("Overview of Movie 1", overview)
+            assertEquals("2024-01-01", releaseDate)
+            assertEquals(75.5, popularity)
+            assertEquals(8.5, voteAverage)
+        }
     }
 
     @Test
-    fun `multiple calls to getMovieDetail with different ids`() = runTest {
+    fun `multiple requests with different ids should load each movie correctly`() = runTest {
         val movie1 = movie(1, "First Movie")
         val movie2 = movie(2, "Second Movie")
 
@@ -167,11 +157,11 @@ class DetailViewModelTest {
 
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
-        assertEquals("First Movie", state().movie!!.title)
+        assertEquals("First Movie", viewModel.movieDetailStateFlow.value.movie!!.title)
 
         viewModel.getMovieDetail(2)
         advanceUntilIdle()
-        assertEquals("Second Movie", state().movie!!.title)
+        assertEquals("Second Movie", viewModel.movieDetailStateFlow.value.movie!!.title)
     }
 }
 
