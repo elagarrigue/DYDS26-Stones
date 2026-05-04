@@ -12,6 +12,7 @@ kotlin {
     
     sourceSets {
         val desktopMain by getting
+        val desktopTest by getting
 
         commonMain.dependencies {
             implementation(libs.kotlin.test)
@@ -39,10 +40,12 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             runtimeOnly(libs.slf4j.simple)
         }
-    }
 
-    sourceSets.commonMain {
-        kotlin.srcDirs("build/generated/ksp/metadata")
+        desktopTest.dependencies {
+            implementation(libs.mockk)
+        }
+
+        //kotlin.srcDirs("build/generated/ksp/metadata")
     }
 
 }
