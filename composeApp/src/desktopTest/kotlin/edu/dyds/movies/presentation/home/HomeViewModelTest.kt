@@ -53,15 +53,13 @@ class HomeViewModelTest {
     @Test
     fun `initial state is empty and not loading`() = runTest {
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
         val s = emissions.last()
         assertFalse(s.isLoading)
         assertTrue(s.movies.isEmpty())
-
-        job.cancel()
     }
 
     @Test
@@ -70,7 +68,7 @@ class HomeViewModelTest {
         coEvery { useCase.invoke() } returns movies
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
@@ -79,8 +77,6 @@ class HomeViewModelTest {
         val s = emissions.last()
         assertFalse(s.isLoading)
         assertEquals(movies, s.movies)
-
-        job.cancel()
     }
 
     @Test
@@ -88,7 +84,7 @@ class HomeViewModelTest {
         coEvery { useCase.invoke() } returns emptyList()
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
@@ -97,8 +93,6 @@ class HomeViewModelTest {
         val s = emissions.last()
         assertFalse(s.isLoading)
         assertTrue(s.movies.isEmpty())
-
-        job.cancel()
     }
 
     @Test
@@ -109,7 +103,7 @@ class HomeViewModelTest {
         }
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
@@ -121,8 +115,6 @@ class HomeViewModelTest {
 
         val final = emissions.last()
         assertFalse(final.isLoading)
-
-        job.cancel()
     }
 
     @Test
@@ -130,7 +122,7 @@ class HomeViewModelTest {
         coEvery { useCase.invoke() } returns emptyList()
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
@@ -138,8 +130,6 @@ class HomeViewModelTest {
 
         assertTrue(emissions.last().movies.isEmpty())
         coVerify(exactly = 1) { useCase.invoke() }
-
-        job.cancel()
     }
 
     @Test
@@ -150,7 +140,7 @@ class HomeViewModelTest {
         )
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
@@ -160,8 +150,6 @@ class HomeViewModelTest {
 
         assertEquals(1, emissions.last().movies.size)
         coVerify(exactly = 2) { useCase.invoke() }
-
-        job.cancel()
     }
 
     @Test
@@ -174,7 +162,7 @@ class HomeViewModelTest {
         coEvery { useCase.invoke() } returns movies
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
@@ -183,8 +171,6 @@ class HomeViewModelTest {
         val s = emissions.last()
         assertEquals(1, s.movies.count { it.isGoodMovie })
         assertEquals(1, s.movies.count { !it.isGoodMovie })
-
-        job.cancel()
     }
 
     @Test
@@ -192,15 +178,13 @@ class HomeViewModelTest {
         coEvery { useCase.invoke() } returns listOf(movie(1, true))
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
         viewModel.getAllMovies()
 
         assertTrue(emissions.last().movies.all { it.isGoodMovie })
-
-        job.cancel()
     }
 
     @Test
@@ -208,15 +192,13 @@ class HomeViewModelTest {
         coEvery { useCase.invoke() } returns listOf(movie(1, false))
 
         val emissions = arrayListOf<HomeViewModel.HomeUiState>()
-        val job = testScope.launch {
+        testScope.launch {
             viewModel.homeStateFlow.collect { emissions.add(it) }
         }
 
         viewModel.getAllMovies()
 
         assertTrue(emissions.last().movies.none { it.isGoodMovie })
-
-        job.cancel()
     }
 
 }

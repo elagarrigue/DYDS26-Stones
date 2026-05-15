@@ -11,14 +11,14 @@ import kotlin.test.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class DetailViewModelTest {
 
+    val testScope = CoroutineScope(UnconfinedTestDispatcher())
     private val useCase = mockk<GetMovieDetailUseCase>(relaxed = true)
-    private val dispatcher = StandardTestDispatcher()
 
     private lateinit var viewModel: DetailViewModel
 
     @BeforeTest
     fun setup() {
-        Dispatchers.setMain(dispatcher)
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         viewModel = DetailViewModel(useCase)
     }
 
@@ -46,8 +46,13 @@ class DetailViewModelTest {
     )
 
     @Test
-    fun `initial state should have no movie loaded`() {
-        val initialState = viewModel.movieDetailStateFlow.value
+    fun `initial state should have no movie loaded`() = runTest {
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
+
+        val initialState = emissions.last()
         assertNull(initialState.movie)
         assertFalse(initialState.isLoading)
     }
@@ -57,10 +62,14 @@ class DetailViewModelTest {
         val testMovie = movie(1, "Test Movie")
         coEvery { useCase(1) } returns testMovie
 
-        viewModel.getMovieDetail(1)
-        advanceUntilIdle()
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
 
-        val finalState = viewModel.movieDetailStateFlow.value
+        viewModel.getMovieDetail(1)
+
+        val finalState = emissions.last()
         assertEquals(testMovie, finalState.movie)
         assertFalse(finalState.isLoading)
     }
@@ -69,10 +78,14 @@ class DetailViewModelTest {
     fun `requesting non-existent movie should result in no movie`() = runTest {
         coEvery { useCase(999) } returns null
 
-        viewModel.getMovieDetail(999)
-        advanceUntilIdle()
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
 
-        val finalState = viewModel.movieDetailStateFlow.value
+        viewModel.getMovieDetail(999)
+
+        val finalState = emissions.last()
         assertNull(finalState.movie)
         assertFalse(finalState.isLoading)
     }
@@ -81,9 +94,13 @@ class DetailViewModelTest {
     fun `calling getMovieDetail when useCase returns null should result in no movie`() = runTest {
         coEvery { useCase(1) } returns null
 
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
+
         viewModel.getMovieDetail(1)
-        advanceUntilIdle()
-        val state = viewModel.movieDetailStateFlow.value
+        val state = emissions.last()
         assertNull(state.movie)
 
         coVerify(exactly = 1) { useCase(1) }
@@ -93,9 +110,13 @@ class DetailViewModelTest {
     fun `calling getMovieDetail when useCase returns movie should result in loaded movie`() = runTest {
         coEvery { useCase(1) } returns movie(1, "First Retry")
 
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
+
         viewModel.getMovieDetail(1)
-        advanceUntilIdle()
-        val state = viewModel.movieDetailStateFlow.value
+        val state = emissions.last()
         assertNotNull(state.movie)
         assertEquals("First Retry", state.movie!!.title)
 
@@ -103,24 +124,36 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `different movie ids should load their respective movies`() = runTest {
+    fun `given movie with id 1, when getMovieDetail(1), then state has Movie One`() = runTest {
         val movie1 = movie(1, "Movie One")
-        val movie2 = movie(2, "Movie Two")
-
         coEvery { useCase(1) } returns movie1
-        coEvery { useCase(2) } returns movie2
+
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
 
         viewModel.getMovieDetail(1)
-        advanceUntilIdle()
-        val state1 = viewModel.movieDetailStateFlow.value
+        val state1 = emissions.last()
         assertEquals("Movie One", state1.movie!!.title)
 
+        coVerify(exactly = 1) { useCase(1) }
+    }
+
+    @Test
+    fun `given movie with id 2, when getMovieDetail(2), then state has Movie Two`() = runTest {
+        val movie2 = movie(2, "Movie Two")
+        coEvery { useCase(2) } returns movie2
+
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
+
         viewModel.getMovieDetail(2)
-        advanceUntilIdle()
-        val state2 = viewModel.movieDetailStateFlow.value
+        val state2 = emissions.last()
         assertEquals("Movie Two", state2.movie!!.title)
 
-        coVerify(exactly = 1) { useCase(1) }
         coVerify(exactly = 1) { useCase(2) }
     }
 
@@ -129,10 +162,14 @@ class DetailViewModelTest {
         val testMovie = movie(1)
         coEvery { useCase(1) } returns testMovie
 
-        viewModel.getMovieDetail(1)
-        advanceUntilIdle()
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
 
-        val finalState = viewModel.movieDetailStateFlow.value
+        viewModel.getMovieDetail(1)
+
+        val finalState = emissions.last()
         assertNotNull(finalState.movie)
         with(finalState.movie!!) {
             assertEquals(1, id)
@@ -145,7 +182,7 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `multiple requests with different ids should load each movie correctly`() = runTest {
+    fun `multiple requests with different ids should load each movie correctly - request 1`() = runTest {
         val movie1 = movie(1, "First Movie")
         val movie2 = movie(2, "Second Movie")
 
@@ -157,16 +194,34 @@ class DetailViewModelTest {
             }
         }
 
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
+
         viewModel.getMovieDetail(1)
-        advanceUntilIdle()
-        assertEquals("First Movie", viewModel.movieDetailStateFlow.value.movie!!.title)
+        assertEquals("First Movie", emissions.last().movie!!.title)
+    }
+
+    @Test
+    fun `multiple requests with different ids should load each movie correctly - request 2`() = runTest {
+        val movie1 = movie(1, "First Movie")
+        val movie2 = movie(2, "Second Movie")
+
+        coEvery { useCase(any()) } answers { call ->
+            when (call.invocation.args[0]) {
+                1 -> movie1
+                2 -> movie2
+                else -> null
+            }
+        }
+
+        val emissions = arrayListOf<DetailViewModel.DetailUiState>()
+        testScope.launch {
+            viewModel.movieDetailStateFlow.collect { emissions.add(it) }
+        }
 
         viewModel.getMovieDetail(2)
-        advanceUntilIdle()
-        assertEquals("Second Movie", viewModel.movieDetailStateFlow.value.movie!!.title)
+        assertEquals("Second Movie", emissions.last().movie!!.title)
     }
 }
-
-
-
-
