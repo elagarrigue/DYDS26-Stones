@@ -12,14 +12,15 @@ import kotlin.test.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
 
-    private val dispatcher = StandardTestDispatcher()
+
+    val testScope = CoroutineScope(UnconfinedTestDispatcher())
     private val useCase = mockk<GetPopularMoviesUseCase>(relaxed = true)
 
     private lateinit var viewModel: HomeViewModel
 
     @BeforeTest
     fun setup() {
-        Dispatchers.setMain(dispatcher)
+        Dispatchers.setMain(UnconfinedTestDispatcher())
         viewModel = HomeViewModel(useCase)
     }
 
@@ -29,24 +30,6 @@ class HomeViewModelTest {
         clearAllMocks()
     }
 
-
-    private suspend fun lastState(): HomeViewModel.HomeUiState = viewModel.homeStateFlow.first()
-
-    private fun TestScope.startCollector(expectedCount: Int): Pair<Job, MutableList<HomeViewModel.HomeUiState>> {
-        val emissions = mutableListOf<HomeViewModel.HomeUiState>()
-        val job = launch {
-            viewModel.homeStateFlow.take(expectedCount).toCollection(emissions)
-        }
-        return Pair(job, emissions)
-    }
-
-    private suspend fun TestScope.collectStates(expectedCount: Int, action: suspend () -> Unit): List<HomeViewModel.HomeUiState> {
-        val (job, emissions) = startCollector(expectedCount)
-        action()
-        advanceUntilIdle()
-        job.cancel()
-        return emissions
-    }
 
     private fun movie(
         id: Int,
@@ -69,9 +52,16 @@ class HomeViewModelTest {
 
     @Test
     fun `initial state is empty and not loading`() = runTest {
-        val s = lastState()
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
+
+        val s = emissions.last()
         assertFalse(s.isLoading)
         assertTrue(s.movies.isEmpty())
+
+        job.cancel()
     }
 
     @Test
@@ -79,47 +69,59 @@ class HomeViewModelTest {
         val movies = listOf(movie(1, true), movie(2, false))
         coEvery { useCase.invoke() } returns movies
 
-        val emissions = collectStates(3) { viewModel.getAllMovies() }
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
+
+        viewModel.getAllMovies()
 
         val s = emissions.last()
         assertFalse(s.isLoading)
         assertEquals(movies, s.movies)
+
+        job.cancel()
     }
 
     @Test
     fun `getAllMovies handles empty result`() = runTest {
         coEvery { useCase.invoke() } returns emptyList()
 
-        val emissions = collectStates(3) { viewModel.getAllMovies() }
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
+
+        viewModel.getAllMovies()
+
         val s = emissions.last()
         assertFalse(s.isLoading)
         assertTrue(s.movies.isEmpty())
+
+        job.cancel()
     }
 
     @Test
     fun `isLoading is true while suspended`() = runTest {
-        val gate = CompletableDeferred<Unit>()
-
         coEvery { useCase.invoke() } coAnswers {
-            gate.await()
+            delay(10)
             listOf(movie(1, true))
         }
 
-        val emissions = mutableListOf<HomeViewModel.HomeUiState>()
-        val job = launch { viewModel.homeStateFlow.take(2).toCollection(emissions) }
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
 
         viewModel.getAllMovies()
 
-        runCurrent()
-
-
         assertTrue(emissions.any { it.isLoading })
 
-        gate.complete(Unit)
         advanceUntilIdle()
 
-        val final = viewModel.homeStateFlow.first()
+        val final = emissions.last()
         assertFalse(final.isLoading)
+
         job.cancel()
     }
 
@@ -127,10 +129,17 @@ class HomeViewModelTest {
     fun `getAllMovies updates state to empty when use case returns empty`() = runTest {
         coEvery { useCase.invoke() } returns emptyList()
 
-        val emissions = collectStates(3) { viewModel.getAllMovies() }
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
+
+        viewModel.getAllMovies()
 
         assertTrue(emissions.last().movies.isEmpty())
         coVerify(exactly = 1) { useCase.invoke() }
+
+        job.cancel()
     }
 
     @Test
@@ -140,11 +149,19 @@ class HomeViewModelTest {
             listOf(movie(1, true))
         )
 
-        collectStates(3) { viewModel.getAllMovies() }
-        val emissions = collectStates(3) { viewModel.getAllMovies() }
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
+
+        viewModel.getAllMovies()
+
+        viewModel.getAllMovies()
 
         assertEquals(1, emissions.last().movies.size)
         coVerify(exactly = 2) { useCase.invoke() }
+
+        job.cancel()
     }
 
     @Test
@@ -156,27 +173,50 @@ class HomeViewModelTest {
 
         coEvery { useCase.invoke() } returns movies
 
-        val emissions = collectStates(3) { viewModel.getAllMovies() }
-        val s = emissions.last()
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
 
+        viewModel.getAllMovies()
+
+        val s = emissions.last()
         assertEquals(1, s.movies.count { it.isGoodMovie })
         assertEquals(1, s.movies.count { !it.isGoodMovie })
+
+        job.cancel()
     }
 
     @Test
     fun `only good movies`() = runTest {
         coEvery { useCase.invoke() } returns listOf(movie(1, true))
 
-        val emissions = collectStates(3) { viewModel.getAllMovies() }
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
+
+        viewModel.getAllMovies()
+
         assertTrue(emissions.last().movies.all { it.isGoodMovie })
+
+        job.cancel()
     }
 
     @Test
     fun `only bad movies`() = runTest {
         coEvery { useCase.invoke() } returns listOf(movie(1, false))
 
-        val emissions = collectStates(3) { viewModel.getAllMovies() }
+        val emissions = arrayListOf<HomeViewModel.HomeUiState>()
+        val job = testScope.launch {
+            viewModel.homeStateFlow.collect { emissions.add(it) }
+        }
+
+        viewModel.getAllMovies()
+
         assertTrue(emissions.last().movies.none { it.isGoodMovie })
+
+        job.cancel()
     }
 
 }

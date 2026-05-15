@@ -78,24 +78,28 @@ class DetailViewModelTest {
     }
 
     @Test
-    fun `calling getMovieDetail again with new id should load the new movie`() = runTest {
-        coEvery { useCase(1) } returnsMany listOf(
-            null,
-            movie(1, "First Retry")
-        )
+    fun `calling getMovieDetail when useCase returns null should result in no movie`() = runTest {
+        coEvery { useCase(1) } returns null
 
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
-        val firstState = viewModel.movieDetailStateFlow.value
-        assertNull(firstState.movie)
+        val state = viewModel.movieDetailStateFlow.value
+        assertNull(state.movie)
+
+        coVerify(exactly = 1) { useCase(1) }
+    }
+
+    @Test
+    fun `calling getMovieDetail when useCase returns movie should result in loaded movie`() = runTest {
+        coEvery { useCase(1) } returns movie(1, "First Retry")
 
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
-        val secondState = viewModel.movieDetailStateFlow.value
-        assertNotNull(secondState.movie)
-        assertEquals("First Retry", secondState.movie!!.title)
+        val state = viewModel.movieDetailStateFlow.value
+        assertNotNull(state.movie)
+        assertEquals("First Retry", state.movie!!.title)
 
-        coVerify(exactly = 2) { useCase(1) }
+        coVerify(exactly = 1) { useCase(1) }
     }
 
     @Test

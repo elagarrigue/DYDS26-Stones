@@ -81,7 +81,7 @@ class MoviesRepositoryTest {
 
         val result = repository.getAllMovies()
 
-        coVerify { localDataSource.savePopularMovies(match { it.size == remoteMovies.size }) }
+        coVerify { localDataSource.savePopularMovies(match { it.size == 2 }) }
         assertTrue(result.isNotEmpty())
         assertEquals(2, result.size)
     }
