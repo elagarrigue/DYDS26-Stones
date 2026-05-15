@@ -7,6 +7,7 @@ import edu.dyds.movies.data.remote.RemoteMoviesDataSource
 import edu.dyds.movies.domain.entity.Movie
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -80,6 +81,7 @@ class MoviesRepositoryTest {
 
         val result = repository.getAllMovies()
 
+        coVerify { localDataSource.savePopularMovies(match { it.size == remoteMovies.size }) }
         assertTrue(result.isNotEmpty())
         assertEquals(2, result.size)
     }
@@ -116,6 +118,7 @@ class MoviesRepositoryTest {
 
         val result = repository.getMovieDetail(10)
 
+        coVerify {localDataSource.saveMovieDetail(match { it.id == 10 }, any()) }
         assertNotNull(result)
         assertEquals(10, result.id)
     }
@@ -132,6 +135,7 @@ class MoviesRepositoryTest {
 
         val result = repository.getMovieDetail(10)
 
+        coVerify {localDataSource.saveMovieDetail(match { it.id == 10 }, any()) }
         assertNotNull(result)
         assertEquals(10, result.id)
         assertEquals("Movie 10", result.title)

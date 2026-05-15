@@ -23,27 +23,41 @@ class MoviesLocalDataSourceImplTest {
     )
 
     @Test
-    fun `getPopularMovies should return saved list and be a copy`() {
+    fun `getPopularMovies should return an empty list by default`() {
         val local = MoviesLocalDataSourceImpl()
-
-        // initially empty
         assertEquals(0, local.getPopularMovies().size)
+    }
 
+    @Test
+    fun `getPopularMovies should return all saved movies`() {
+        val local = MoviesLocalDataSourceImpl()
         val movies = listOf(movie(1), movie(2))
         local.savePopularMovies(movies)
 
         val retrieved = local.getPopularMovies()
         assertEquals(2, retrieved.size)
-        // should not be same instance as the original list (copy)
+        assertEquals(movies, retrieved)
+    }
+
+    @Test
+    fun `getPopularMovies should return a copy of the list`() {
+        val local = MoviesLocalDataSourceImpl()
+        val movies = listOf(movie(1), movie(2))
+        local.savePopularMovies(movies)
+
+        val retrieved = local.getPopularMovies()
         assertNotSame(movies, retrieved)
     }
 
     @Test
-    fun `getMovieDetail should return null when not present and after saving should return movie`() {
+    fun `getMovieDetail should return null if movie is not in cache`() {
         val local = MoviesLocalDataSourceImpl()
-
         assertNull(local.getMovieDetail(1))
+    }
 
+    @Test
+    fun `getMovieDetail should return movie if it is present in cache`() {
+        val local = MoviesLocalDataSourceImpl()
         val m = movie(1)
         local.savePopularMovies(listOf(m))
 
@@ -59,11 +73,9 @@ class MoviesLocalDataSourceImplTest {
         val m2 = movie(2)
         local.savePopularMovies(listOf(m1, m2))
 
-        // create an updated movie with same id as m1 and save at index 0
         val updated = movie(1, voteAverage = 9.0)
         local.saveMovieDetail(updated, 0)
 
-        // getMovieDetail returns first matching id -> should be the newly inserted one
         val retrieved = local.getMovieDetail(1)
         assertEquals(updated, retrieved)
     }

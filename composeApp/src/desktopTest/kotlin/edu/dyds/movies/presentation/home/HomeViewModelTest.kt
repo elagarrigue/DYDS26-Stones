@@ -124,20 +124,26 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `retry updates state`() = runTest {
+    fun `getAllMovies updates state to empty when use case returns empty`() = runTest {
+        coEvery { useCase.invoke() } returns emptyList()
+
+        val emissions = collectStates(3) { viewModel.getAllMovies() }
+
+        assertTrue(emissions.last().movies.isEmpty())
+        coVerify(exactly = 1) { useCase.invoke() }
+    }
+
+    @Test
+    fun `getAllMovies updates state with new data on second call`() = runTest {
         coEvery { useCase.invoke() } returnsMany listOf(
             emptyList(),
             listOf(movie(1, true))
         )
 
+        collectStates(3) { viewModel.getAllMovies() }
+        val emissions = collectStates(3) { viewModel.getAllMovies() }
 
-        var emissions = collectStates(3) { viewModel.getAllMovies() }
-        assertTrue(emissions.last().movies.isEmpty())
-
-
-        emissions = collectStates(3) { viewModel.getAllMovies() }
         assertEquals(1, emissions.last().movies.size)
-
         coVerify(exactly = 2) { useCase.invoke() }
     }
 

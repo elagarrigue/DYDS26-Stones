@@ -84,13 +84,11 @@ class DetailViewModelTest {
             movie(1, "First Retry")
         )
 
-        // First call returns null
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
         val firstState = viewModel.movieDetailStateFlow.value
         assertNull(firstState.movie)
 
-        // Second call returns movie
         viewModel.getMovieDetail(1)
         advanceUntilIdle()
         val secondState = viewModel.movieDetailStateFlow.value

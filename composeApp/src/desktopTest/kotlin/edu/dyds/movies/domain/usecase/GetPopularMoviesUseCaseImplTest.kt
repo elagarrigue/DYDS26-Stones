@@ -6,6 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -13,6 +14,15 @@ import kotlin.test.assertFalse
 
 class GetPopularMoviesUseCaseImplTest {
 
+    private lateinit var repository: MoviesRepository
+    private lateinit var useCase: GetPopularMoviesUseCase
+
+    @BeforeTest
+    fun setUp() {
+        repository = mockk<MoviesRepository>()
+        useCase = GetPopularMoviesUseCaseImpl(repository)
+
+    }
     private fun movie(id: Int, voteAverage: Double) = Movie(
         id = id,
         title = "title$id",
@@ -28,8 +38,6 @@ class GetPopularMoviesUseCaseImplTest {
 
     @Test
     fun `invoke should sort by voteAverage desc and map to QualifiedMovie with threshold`() = runTest {
-        // arrange
-        val repository = mockk<MoviesRepository>()
         val list = listOf(
             movie(1, 5.0),
             movie(2, 8.0),
@@ -38,19 +46,14 @@ class GetPopularMoviesUseCaseImplTest {
         )
         coEvery { repository.getAllMovies() } returns list
 
-        val useCase = GetPopularMoviesUseCaseImpl(repository)
-
-        // act
         val result = useCase()
 
-        // assert: ordered by voteAverage desc
         assertEquals(4, result.size)
         assertEquals(2, result[0].movie.id)
         assertEquals(3, result[1].movie.id)
         assertEquals(1, result[2].movie.id)
         assertEquals(4, result[3].movie.id)
 
-        // assert: isGoodMovie threshold (>= 6.0)
         assertTrue(result[0].isGoodMovie) // id 2 -> 8.0
         assertTrue(result[1].isGoodMovie) // id 3 -> 6.0
         assertFalse(result[2].isGoodMovie) // id 1 -> 5.0
@@ -61,16 +64,10 @@ class GetPopularMoviesUseCaseImplTest {
 
     @Test
     fun `invoke should return empty list when repository returns empty`() = runTest {
-        // arrange
-        val repository = mockk<MoviesRepository>()
         coEvery { repository.getAllMovies() } returns emptyList()
 
-        val useCase = GetPopularMoviesUseCaseImpl(repository)
-
-        // act
         val result = useCase()
 
-        // assert
         assertEquals(0, result.size)
         coVerify(exactly = 1) { repository.getAllMovies() }
     }
