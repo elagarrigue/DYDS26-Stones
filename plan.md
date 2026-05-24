@@ -136,7 +136,7 @@ ACCIONES:
 
 ---
 
-## Paso 3 — Implementar `OMDBMoviesExternalSource`
+## Paso 3 — Implementar `OMDBMoviesExternalSource` — **Completados** ✅
 
 **Objetivo:** Crear la implementación concreta que consulta la API de OMDB.
 
@@ -176,6 +176,15 @@ ACCIONES:
 ```
 
 **Condición para avanzar:** Tests de OMDB en verde.
+
+**Estado:** Paso 3 completado.
+
+**Detalles del refactor:**
+- Renombrado `OmdbMovieResponse` → `OmdbRemoteMovie` (coherencia con patrón TMDB)
+- Agregados campos adicionales: `Language`, `Released`, `Metascore`
+- Inyección testeable de `clientProvider` y `movieResponseProvider`
+- Tests con `mockk` en lugar de `MockEngine` (alineado con patrón del proyecto)
+- API Key hardcodeada: `OMDB_API_KEY = "a96e7f78"`
 
 ---
 

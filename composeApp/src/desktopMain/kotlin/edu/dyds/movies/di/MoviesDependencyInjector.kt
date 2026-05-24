@@ -17,6 +17,7 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
+private const val TMDB_API_KEY = "d18da1b5da16397619c688b0263cd281"
 private const val API_KEY = "d18da1b5da16397619c688b0263cd281"
 
 object MoviesDependencyInjector {
