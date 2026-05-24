@@ -1,12 +1,13 @@
-package edu.dyds.movies.data.remote
+package edu.dyds.movies.data.external.tmdb
 
 import edu.dyds.movies.data.external.model.RemoteMovie
 import edu.dyds.movies.data.external.model.RemoteResult
+import edu.dyds.movies.data.remote.RemoteMoviesDataSource
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 
-class RemoteMoviesDataSourceImpl(
+class TMDBMoviesExternalSource(
 	private val tmdbHttpClient: HttpClient,
 ) : RemoteMoviesDataSource {
 
@@ -29,4 +30,5 @@ class RemoteMoviesDataSourceImpl(
 	private suspend fun fetchMovieDetails(movieId: Int): RemoteMovie =
 		tmdbHttpClient.get("/3/movie/$movieId").body()
 }
+
 

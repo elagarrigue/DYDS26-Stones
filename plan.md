@@ -81,7 +81,7 @@ ACCIONES:
 
 ---
 
-## Paso 2 — Separar `MoviesExternalSource` en dos interfaces
+## Paso 2 — Separar `MoviesExternalSource` en dos interfaces — **Completados** ✅
 
 **Objetivo:** Respetar el DIP — OMDB solo devuelve un resultado, no una lista, por lo que no puede implementar la misma interfaz que TMDB.
 
@@ -117,6 +117,19 @@ ACCIONES:
 1. read_file de los tests de MoviesExternalSource
 2. Ajustar cualquier test que haga referencia a la firma anterior
 3. run_tests — verde antes de continuar
+```
+
+### 2.4 Mover `RemoteMoviesDataSourceImpl` a `data/external/tmdb` y renombrarlo a `TMDBMoviesExternalSource`
+
+```
+ACCIONES:
+1. read_file de `RemoteMoviesDataSourceImpl`
+2. Mover el archivo a `data/external/tmdb`
+3. Renombrar la clase a `TMDBMoviesExternalSource`
+4. Mantener la implementación de `RemoteMoviesDataSource` sin cambiar comportamiento
+5. search_in_files "RemoteMoviesDataSourceImpl" para encontrar dependencias
+6. Actualizar imports, constructores e inyección de dependencias para usar `TMDBMoviesExternalSource`
+7. run_tests de `desktopTest` — verde antes de continuar
 ```
 
 **Condición para avanzar:** Ambas interfaces existen, los tests pasan.

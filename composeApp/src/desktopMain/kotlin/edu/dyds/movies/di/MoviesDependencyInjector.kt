@@ -2,8 +2,8 @@ package edu.dyds.movies.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.dyds.movies.data.external.tmdb.TMDBMoviesExternalSource
 import edu.dyds.movies.data.local.MoviesLocalDataSourceImpl
-import edu.dyds.movies.data.remote.RemoteMoviesDataSourceImpl
 import edu.dyds.movies.data.repository.MoviesRepositoryImpl
 import edu.dyds.movies.domain.usecase.GetMovieDetailUseCaseImpl
 import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
@@ -42,7 +42,7 @@ object MoviesDependencyInjector {
 
     private val localDataSource = MoviesLocalDataSourceImpl()
 
-    private val remoteDataSource = RemoteMoviesDataSourceImpl(tmdbHttpClient)
+    private val remoteDataSource = TMDBMoviesExternalSource(tmdbHttpClient)
 
     @Composable
     fun getHomeViewModel(): HomeViewModel {
