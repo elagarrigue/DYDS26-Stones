@@ -5,6 +5,6 @@ import edu.dyds.movies.data.external.model.RemoteResult
 
 interface RemoteMoviesDataSource {
 	suspend fun getPopularMovies(): RemoteResult
-	suspend fun getMovieDetails(id: Int): RemoteMovie
+	suspend fun getMovieDetails(title: String): RemoteMovie
 }
 

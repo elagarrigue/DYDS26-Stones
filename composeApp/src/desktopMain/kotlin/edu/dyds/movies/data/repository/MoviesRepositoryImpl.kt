@@ -33,8 +33,13 @@ class MoviesRepositoryImpl(
 			cachedMovieDetail
 		}
 		else try {
-			remoteDataSource.getMovieDetails(id).toDomainMovie()
-				.also {saveMovieDetail(it)}
+			val cachedMovie = getAllMovies()
+			val movieTitle = cachedMovie.firstOrNull { it.id == id }?.title
+
+			movieTitle?.let {
+				remoteDataSource.getMovieDetails(it).toDomainMovie()
+					.also { movie -> saveMovieDetail(movie) }
+			}
             } catch (_: Exception) {
 				null
             }

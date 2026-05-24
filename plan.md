@@ -17,7 +17,7 @@
 
 ---
 
-## Paso 0 — Relevamiento inicial
+## Paso 0 — Relevamiento inicial — **Completados** ✅
 
 **Objetivo:** Entender la estructura del proyecto antes de tocar nada.
 
@@ -37,26 +37,26 @@ ACCIONES:
 
 ---
 
-## Paso 1 — Reemplazar `getMovieDetails(id: Int)` por `getMovieDetails(title: String)` en TMDB
+## Paso 1 — Reemplazar `getMovieDetails(id: Int)` por `getMovieDetails(title: String)` en `RemoteMoviesDataSource` — **Completados** ✅
 
 **Objetivo:** Cambiar el método de búsqueda por ID a búsqueda por título en TMDB.
 
-### 1.1 Modificar la interfaz `MoviesExternalSource`
+### 1.1 Modificar la interfaz `RemoteMoviesDataSource`
 
 ```
 ACCIONES:
-1. read_file MoviesExternalSource (interfaz)
+1. read_file `RemoteMoviesDataSource` (interfaz)
 2. Reemplazar la firma:
    - ANTES:  suspend fun getMovieDetails(id: Int): Movie
    - DESPUÉS: suspend fun getMovieDetails(title: String): Movie
 3. Guardar el archivo
 ```
 
-### 1.2 Modificar `TMDBMoviesExternalSource`
+### 1.2 Modificar `RemoteMoviesDataSourceImpl`
 
 ```
 ACCIONES:
-1. read_file TMDBMoviesExternalSource
+1. read_file `RemoteMoviesDataSourceImpl`
 2. search_in_files "getMovieDetails" para encontrar todos los call sites
 3. Cambiar la implementación para usar el endpoint de TMDB Search Movie:
    - Endpoint: GET /search/movie?query={title}
@@ -66,15 +66,15 @@ ACCIONES:
 5. Guardar el archivo
 ```
 
-### 1.3 Actualizar tests de TMDB
+### 1.3 Actualizar tests de `RemoteMoviesDataSource`
 
 ```
 ACCIONES:
-1. read_file del test de TMDBMoviesExternalSource
+1. read_file del test de `RemoteMoviesDataSource`
 2. Reemplazar todos los casos de test que usen getMovieDetails(id: Int)
    por getMovieDetails(title: String)
 3. Actualizar los mocks/stubs del endpoint para que respondan al nuevo parámetro
-4. run_tests — deben pasar TODOS los tests de TMDB antes de continuar
+4. run_tests — deben pasar TODOS los tests de `RemoteMoviesDataSource` antes de continuar
 ```
 
 **Condición para avanzar:** `run_tests` verde en los tests de TMDB.

@@ -13,7 +13,20 @@ class RemoteMoviesDataSourceImpl(
 	override suspend fun getPopularMovies(): RemoteResult =
 		tmdbHttpClient.get("/3/discover/movie?sort_by=popularity.desc").body()
 
-	override suspend fun getMovieDetails(id: Int): RemoteMovie =
-		tmdbHttpClient.get("/3/movie/$id").body()
+	override suspend fun getMovieDetails(title: String): RemoteMovie {
+		val searchResult = searchMovieByTitle(title)
+		val movieId = requireFirstMovieId(searchResult, title)
+		return fetchMovieDetails(movieId)
+	}
+
+	private suspend fun searchMovieByTitle(title: String): RemoteResult =
+		tmdbHttpClient.get("/3/search/movie?query=$title").body()
+
+	private fun requireFirstMovieId(searchResult: RemoteResult, title: String): Int =
+		searchResult.results.firstOrNull()?.id
+			?: throw Exception("Movie not found: $title")
+
+	private suspend fun fetchMovieDetails(movieId: Int): RemoteMovie =
+		tmdbHttpClient.get("/3/movie/$movieId").body()
 }
 

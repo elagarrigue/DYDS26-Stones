@@ -112,8 +112,8 @@ class MoviesRepositoryTest {
         val cachedList = listOf(testMovie(1), testMovie(10))
 
         every { localDataSource.getMovieDetail(10) } returns null
-        coEvery { remoteDataSource.getMovieDetails(10) } returns remoteMovie
         every { localDataSource.getPopularMovies() } returns cachedList
+        coEvery { remoteDataSource.getMovieDetails("Movie 10") } returns remoteMovie
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)
@@ -125,12 +125,12 @@ class MoviesRepositoryTest {
 
     @org.junit.Test
     fun `getMovieDetail returns correct movie when not in cache`() = runTest {
-        val cachedList = listOf(testMovie(1), testMovie(2))
+        val cachedList = listOf(testMovie(1), testMovie(10), testMovie(2))
         val remoteMovie = testRemoteMovie(10)
 
         every { localDataSource.getMovieDetail(10) } returns null
-        coEvery { remoteDataSource.getMovieDetails(10) } returns remoteMovie
         every { localDataSource.getPopularMovies() } returns cachedList
+        coEvery { remoteDataSource.getMovieDetails("Movie 10") } returns remoteMovie
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)
@@ -144,7 +144,8 @@ class MoviesRepositoryTest {
     @org.junit.Test
     fun `getMovieDetail returns null when not cached and remote fails`() = runTest {
         every { localDataSource.getMovieDetail(999) } returns null
-        coEvery { remoteDataSource.getMovieDetails(999) } throws Exception("Not found")
+        every { localDataSource.getPopularMovies() } returns emptyList()
+        coEvery { remoteDataSource.getMovieDetails(any()) } throws Exception("Not found")
 
         val result = repository.getMovieDetail(999)
 
