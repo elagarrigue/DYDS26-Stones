@@ -268,7 +268,7 @@ ACCIONES:
 
 ---
 
-## Paso 6 — Wiring: registrar el Broker en el contenedor de DI
+## Paso 6 — Wiring: registrar el Broker en el contenedor de DI — **Completados** ✅
 
 **Objetivo:** Que el resto de la aplicación use el Broker en lugar de TMDB directamente.
 
@@ -290,7 +290,7 @@ ACCIONES:
 
 ---
 
-## Paso 7 — Verificación final
+## Paso 7 — Verificación final — COMPLETADOS ✅
 
 ```
 ACCIONES:

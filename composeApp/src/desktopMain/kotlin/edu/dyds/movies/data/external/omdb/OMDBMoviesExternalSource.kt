@@ -12,10 +12,8 @@ import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-private const val OMDB_API_KEY = "a96e7f78"
-
 class OMDBMoviesExternalSource(
-    private val apiKey: String = OMDB_API_KEY,
+    private val apiKey: String,
     private val clientProvider: () -> HttpClient = { createHttpClient(apiKey) },
     private val movieResponseProvider: suspend (HttpClient, String) -> OmdbRemoteMovie = { client, title ->
         client.get("/") {
@@ -49,6 +47,3 @@ private fun createHttpClient(apiKey: String): HttpClient = HttpClient {
         requestTimeoutMillis = 5000
     }
 }
-
-
-

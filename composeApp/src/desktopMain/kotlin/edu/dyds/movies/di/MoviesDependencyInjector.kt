@@ -3,10 +3,11 @@ package edu.dyds.movies.di
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.dyds.movies.data.external.tmdb.TMDBMoviesExternalSource
+import edu.dyds.movies.data.external.omdb.OMDBMoviesExternalSource
+import edu.dyds.movies.data.external.broker.MoviesBroker
 import edu.dyds.movies.data.local.MoviesLocalDataSourceImpl
 import edu.dyds.movies.data.repository.MoviesRepositoryImpl
 import edu.dyds.movies.domain.usecase.GetMovieDetailUseCaseImpl
-import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCase
 import edu.dyds.movies.domain.usecase.GetPopularMoviesUseCaseImpl
 import edu.dyds.movies.presentation.detail.DetailViewModel
 import edu.dyds.movies.presentation.home.HomeViewModel
@@ -17,8 +18,8 @@ import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-private const val TMDB_API_KEY = "d18da1b5da16397619c688b0263cd281"
-private const val API_KEY = "d18da1b5da16397619c688b0263cd281"
+private val TMDB_API_KEY: String = System.getenv("TMDB_API_KEY")
+    ?: "d18da1b5da16397619c688b0263cd281"
 
 object MoviesDependencyInjector {
 
@@ -33,7 +34,7 @@ object MoviesDependencyInjector {
                 url {
                     protocol = URLProtocol.HTTPS
                     host = "api.themoviedb.org"
-                    parameters.append("api_key", API_KEY)
+                    parameters.append("api_key", TMDB_API_KEY)
                 }
             }
             install(HttpTimeout) {
@@ -43,7 +44,31 @@ object MoviesDependencyInjector {
 
     private val localDataSource = MoviesLocalDataSourceImpl()
 
-    private val remoteDataSource = TMDBMoviesExternalSource(tmdbHttpClient)
+    // instancia de la fuente TMDB
+    private val tmdbRemoteSource = TMDBMoviesExternalSource(tmdbHttpClient)
+
+    // leer OMDB API key desde la variable de entorno; permitir fallback en development
+    private val omdbApiKey: String
+        get() {
+            val envKey = System.getenv("OMDB_API_KEY")
+            if (envKey != null) return envKey
+            val env = System.getenv("APP_ENV") ?: "development"
+            return if (env == "development") {
+                // fallback dev key (only for local development)
+                "a96e7f78"
+            } else {
+                error("OMDB_API_KEY environment variable is not set")
+            }
+        }
+
+    // instancia de la fuente OMDB
+    private val omdbRemoteSource = OMDBMoviesExternalSource(apiKey = omdbApiKey)
+
+    // Broker que orquesta TMDB y OMDB y expone RemoteMoviesDataSource
+    private val remoteDataSource = MoviesBroker(
+        tmdb = tmdbRemoteSource,
+        omdb = omdbRemoteSource
+    )
 
     @Composable
     fun getHomeViewModel(): HomeViewModel {
