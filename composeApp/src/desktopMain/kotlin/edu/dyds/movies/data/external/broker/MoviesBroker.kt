@@ -25,19 +25,15 @@ class MoviesBroker(
 
         return when {
             tmdbResult != null && omdbResult != null -> {
-                // Combinar ambos resultados - TMDB tiene precedencia
                 combineResults(tmdbResult, omdbResult)
             }
             tmdbResult != null -> {
-                // Solo TMDB retorna resultado
                 tmdbResult.copy(overview = tmdbResult.overview + " TMDB")
             }
             omdbResult != null -> {
-                // Solo OMDB retorna resultado
                 omdbResult.copy(overview = omdbResult.overview + " OMDB")
             }
             else -> {
-                // Ninguno retorna resultado
                 throw Exception("Movie not found: $title")
             }
         }
