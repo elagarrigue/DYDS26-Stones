@@ -44,27 +44,22 @@ object MoviesDependencyInjector {
 
     private val localDataSource = MoviesLocalDataSourceImpl()
 
-    // instancia de la fuente TMDB
     private val tmdbRemoteSource = TMDBMoviesExternalSource(tmdbHttpClient)
 
-    // leer OMDB API key desde la variable de entorno; permitir fallback en development
     private val omdbApiKey: String
         get() {
             val envKey = System.getenv("OMDB_API_KEY")
             if (envKey != null) return envKey
             val env = System.getenv("APP_ENV") ?: "development"
             return if (env == "development") {
-                // fallback dev key (only for local development)
                 "a96e7f78"
             } else {
                 error("OMDB_API_KEY environment variable is not set")
             }
         }
 
-    // instancia de la fuente OMDB
     private val omdbRemoteSource = OMDBMoviesExternalSource(apiKey = omdbApiKey)
 
-    // Broker que orquesta TMDB y OMDB y expone RemoteMoviesDataSource
     private val remoteDataSource = MoviesBroker(
         tmdb = tmdbRemoteSource,
         omdb = omdbRemoteSource
