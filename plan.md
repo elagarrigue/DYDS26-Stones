@@ -188,7 +188,7 @@ ACCIONES:
 
 ---
 
-## Paso 4 — Implementar el Broker
+## Paso 4 — Implementar el Broker — **Completados** ✅
 
 **Objetivo:** Crear la clase que orquesta TMDB y OMDB y expone una sola interfaz al cliente.
 
@@ -231,7 +231,7 @@ salvo que el campo esté vacío.
 
 ---
 
-## Paso 5 — Tests del Broker
+## Paso 5 — Tests del Broker — **Completados** ✅
 
 **Objetivo:** Cubrir los 4 casos de la lógica de combinación.
 
