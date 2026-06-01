@@ -3,8 +3,11 @@ package edu.dyds.movies.data.remote
 import edu.dyds.movies.data.external.model.RemoteMovie
 import edu.dyds.movies.data.external.model.RemoteResult
 
-interface RemoteMoviesDataSource {
+interface PopularMoviesExternalSource {
 	suspend fun getPopularMovies(): RemoteResult
-	suspend fun getMovieDetails(title: String): RemoteMovie
+}
+
+interface MovieDetailExternalSource {
+	suspend fun getMovieByTitle(title: String): RemoteMovie?
 }
 

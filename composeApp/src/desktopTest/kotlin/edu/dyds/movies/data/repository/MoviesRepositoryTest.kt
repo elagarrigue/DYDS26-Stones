@@ -3,7 +3,8 @@ package edu.dyds.movies.data.repository
 import edu.dyds.movies.data.external.model.RemoteMovie
 import edu.dyds.movies.data.external.model.RemoteResult
 import edu.dyds.movies.data.local.MoviesLocalDataSource
-import edu.dyds.movies.data.remote.RemoteMoviesDataSource
+import edu.dyds.movies.data.remote.MovieDetailExternalSource
+import edu.dyds.movies.data.remote.PopularMoviesExternalSource
 import edu.dyds.movies.domain.entity.Movie
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -21,11 +22,13 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class MoviesRepositoryTest {
 
-    private val remoteDataSource = mockk<RemoteMoviesDataSource>()
+  private val popularMoviesExternalSource = mockk<PopularMoviesExternalSource>()
+  private val movieDetailExternalSource = mockk<MovieDetailExternalSource>()
     private val localDataSource = mockk<MoviesLocalDataSource>()
 
     private val repository = MoviesRepositoryImpl(
-        remoteDataSource = remoteDataSource,
+    popularMoviesExternalSource = popularMoviesExternalSource,
+    movieDetailExternalSource = movieDetailExternalSource,
         localDataSource = localDataSource
     )
 
@@ -76,7 +79,7 @@ class MoviesRepositoryTest {
         val remoteResult = RemoteResult(page = 1, results = remoteMovies, totalPages = 1, totalResults = remoteMovies.size)
 
         every { localDataSource.getPopularMovies() } returns emptyList()
-        coEvery { remoteDataSource.getPopularMovies() } returns remoteResult
+            coEvery { popularMoviesExternalSource.getPopularMovies() } returns remoteResult
         every { localDataSource.savePopularMovies(any()) } returns Unit
 
         val result = repository.getAllMovies()
@@ -89,7 +92,7 @@ class MoviesRepositoryTest {
     @org.junit.Test
     fun `getAllMovies returns empty list when cache is empty and remote fails`() = runTest {
         every { localDataSource.getPopularMovies() } returns emptyList()
-        coEvery { remoteDataSource.getPopularMovies() } throws Exception("Network error")
+        coEvery { popularMoviesExternalSource.getPopularMovies() } throws Exception("Network error")
 
         val result = repository.getAllMovies()
 
@@ -113,7 +116,7 @@ class MoviesRepositoryTest {
 
         every { localDataSource.getMovieDetail(10) } returns null
         every { localDataSource.getPopularMovies() } returns cachedList
-        coEvery { remoteDataSource.getMovieDetails("Movie 10") } returns remoteMovie
+            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns remoteMovie
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)
@@ -130,7 +133,7 @@ class MoviesRepositoryTest {
 
         every { localDataSource.getMovieDetail(10) } returns null
         every { localDataSource.getPopularMovies() } returns cachedList
-        coEvery { remoteDataSource.getMovieDetails("Movie 10") } returns remoteMovie
+            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns remoteMovie
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)
@@ -145,7 +148,7 @@ class MoviesRepositoryTest {
     fun `getMovieDetail returns null when not cached and remote fails`() = runTest {
         every { localDataSource.getMovieDetail(999) } returns null
         every { localDataSource.getPopularMovies() } returns emptyList()
-        coEvery { remoteDataSource.getMovieDetails(any()) } throws Exception("Not found")
+        coEvery { movieDetailExternalSource.getMovieByTitle(any()) } throws Exception("Not found")
 
         val result = repository.getMovieDetail(999)
 

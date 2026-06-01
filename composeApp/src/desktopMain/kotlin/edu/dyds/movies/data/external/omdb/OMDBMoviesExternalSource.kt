@@ -1,7 +1,7 @@
 package edu.dyds.movies.data.external.omdb
 
 import edu.dyds.movies.data.external.model.RemoteMovie
-import edu.dyds.movies.data.remote.SingleMovieExternalSource
+import edu.dyds.movies.data.remote.MovieDetailExternalSource
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.DefaultRequest
@@ -22,7 +22,7 @@ class OMDBMoviesExternalSource(
             }
         }.body()
     },
-) : SingleMovieExternalSource {
+) : MovieDetailExternalSource {
 
     override suspend fun getMovieByTitle(title: String): RemoteMovie? {
         val response = movieResponseProvider(clientProvider(), title)

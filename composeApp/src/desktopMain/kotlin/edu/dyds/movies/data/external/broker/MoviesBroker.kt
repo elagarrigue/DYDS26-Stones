@@ -1,23 +1,17 @@
 package edu.dyds.movies.data.external.broker
 
 import edu.dyds.movies.data.external.model.RemoteMovie
-import edu.dyds.movies.data.external.model.RemoteResult
-import edu.dyds.movies.data.remote.RemoteMoviesDataSource
-import edu.dyds.movies.data.remote.SingleMovieExternalSource
+import edu.dyds.movies.data.remote.MovieDetailExternalSource
 
 class MoviesBroker(
-    private val tmdb: RemoteMoviesDataSource,
-    private val omdb: SingleMovieExternalSource,
-) : RemoteMoviesDataSource {
+    private val tmdb: MovieDetailExternalSource,
+    private val omdb: MovieDetailExternalSource,
+) : MovieDetailExternalSource {
 
-    override suspend fun getPopularMovies(): RemoteResult {
-        return tmdb.getPopularMovies()
-    }
-
-    override suspend fun getMovieDetails(title: String): RemoteMovie {
+    override suspend fun getMovieByTitle(title: String): RemoteMovie? {
         val tmdbResult = try {
-            tmdb.getMovieDetails(title)
-        } catch (e: Exception) {
+            tmdb.getMovieByTitle(title)
+        } catch (_: Exception) {
             null
         }
 
@@ -28,22 +22,26 @@ class MoviesBroker(
                 combineResults(tmdbResult, omdbResult)
             }
             tmdbResult != null -> {
-                tmdbResult.copy(overview = tmdbResult.overview + " TMDB")
+                tmdbResult.copy(overview = "TMDB:" + tmdbResult.overview)
             }
             omdbResult != null -> {
-                omdbResult.copy(overview = omdbResult.overview + " OMDB")
+                omdbResult.copy(overview = "OMDB:" + omdbResult.overview)
             }
             else -> {
-                throw Exception("Movie not found: $title")
+                null
             }
         }
     }
 
     private fun combineResults(tmdb: RemoteMovie, omdb: RemoteMovie): RemoteMovie {
+        val overviewParts = listOfNotNull(
+            tmdb.overview.takeIf { it.isNotBlank() }?.let { "TMDB: $it" },
+            omdb.overview.takeIf { it.isNotBlank() }?.let { "OMDB: $it" },
+        )
         return RemoteMovie(
             id = tmdb.id,
             title = tmdb.title.ifEmpty { omdb.title },
-            overview = (tmdb.overview.takeUnless { it.isEmpty() } ?: omdb.overview) + " TMDB+OMDB",
+            overview = overviewParts.joinToString(" | "),
             releaseDate = tmdb.releaseDate.ifEmpty { omdb.releaseDate },
             posterPath = tmdb.posterPath.ifEmpty { omdb.posterPath },
             backdropPath = tmdb.backdropPath ?: omdb.backdropPath,

@@ -60,16 +60,18 @@ object MoviesDependencyInjector {
 
     private val omdbRemoteSource = OMDBMoviesExternalSource(apiKey = omdbApiKey)
 
-    private val remoteDataSource = MoviesBroker(
+      private val popularMoviesExternalSource = tmdbRemoteSource
+      private val movieDetailExternalSource = MoviesBroker(
         tmdb = tmdbRemoteSource,
-        omdb = omdbRemoteSource
-    )
+        omdb = omdbRemoteSource,
+      )
 
     @Composable
     fun getHomeViewModel(): HomeViewModel {
         return viewModel {
             val moviesRepository = MoviesRepositoryImpl(
-                remoteDataSource = remoteDataSource,
+            popularMoviesExternalSource = popularMoviesExternalSource,
+            movieDetailExternalSource = movieDetailExternalSource,
                 localDataSource = localDataSource
             )
             HomeViewModel(
@@ -82,7 +84,8 @@ object MoviesDependencyInjector {
     fun getDetailViewModel(): DetailViewModel {
         return viewModel {
             val moviesRepository = MoviesRepositoryImpl(
-                remoteDataSource = remoteDataSource,
+            popularMoviesExternalSource = popularMoviesExternalSource,
+            movieDetailExternalSource = movieDetailExternalSource,
                 localDataSource = localDataSource
             )
             DetailViewModel(

@@ -1,8 +1,7 @@
 package edu.dyds.movies.data.external.broker
 
 import edu.dyds.movies.data.external.model.RemoteMovie
-import edu.dyds.movies.data.remote.RemoteMoviesDataSource
-import edu.dyds.movies.data.remote.SingleMovieExternalSource
+import edu.dyds.movies.data.remote.MovieDetailExternalSource
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -11,7 +10,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MoviesBrokerTest {
@@ -49,20 +48,22 @@ class MoviesBrokerTest {
 
     @Test
     fun `getMovieDetails combines TMDB and OMDB results when both return data`() = runTest {
-        val tmdb = mockk<RemoteMoviesDataSource>()
-        val omdb = mockk<SingleMovieExternalSource>()
+        val tmdb = mockk<MovieDetailExternalSource>()
+        val omdb = mockk<MovieDetailExternalSource>()
         val broker = MoviesBroker(tmdb = tmdb, omdb = omdb)
 
-        coEvery { tmdb.getMovieDetails("Inception") } returns tmdbMovie()
+        val tmdbCombinedMovie = tmdbMovie().copy(overview = "A science-fantasy heist set in dreams.")
+
+        coEvery { tmdb.getMovieByTitle("Inception") } returns tmdbCombinedMovie
         coEvery { omdb.getMovieByTitle("Inception") } returns omdbMovie()
 
-        val result = broker.getMovieDetails("Inception")
+        val result = broker.getMovieByTitle("Inception")
 
         assertEquals(
             RemoteMovie(
                 id = 27205,
                 title = "Inception",
-                overview = "A thief who steals corporate secrets through the use of dream-sharing technology. TMDB+OMDB",
+                overview = "TMDB: A science-fantasy heist set in dreams. | OMDB: A thief who steals corporate secrets through the use of dream-sharing technology.",
                 releaseDate = "2010-07-16",
                 posterPath = "https://example.com/inception.jpg",
                 backdropPath = "/backdrop.jpg",
@@ -77,46 +78,44 @@ class MoviesBrokerTest {
 
     @Test
     fun `getMovieDetails returns TMDB result when OMDB does not return data`() = runTest {
-        val tmdb = mockk<RemoteMoviesDataSource>()
-        val omdb = mockk<SingleMovieExternalSource>()
+        val tmdb = mockk<MovieDetailExternalSource>()
+        val omdb = mockk<MovieDetailExternalSource>()
         val broker = MoviesBroker(tmdb = tmdb, omdb = omdb)
 
-        coEvery { tmdb.getMovieDetails("Inception") } returns tmdbMovie()
+        coEvery { tmdb.getMovieByTitle("Inception") } returns tmdbMovie()
         coEvery { omdb.getMovieByTitle("Inception") } returns null
 
-        val result = broker.getMovieDetails("Inception")
+        val result = broker.getMovieByTitle("Inception")
 
-        assertEquals(tmdbMovie().copy(overview = " TMDB"), result)
+        assertEquals(tmdbMovie().copy(overview = "TMDB:" + tmdbMovie().overview), result)
     }
 
     @Test
     fun `getMovieDetails returns OMDB result when TMDB does not return data`() = runTest {
-        val tmdb = mockk<RemoteMoviesDataSource>()
-        val omdb = mockk<SingleMovieExternalSource>()
+        val tmdb = mockk<MovieDetailExternalSource>()
+        val omdb = mockk<MovieDetailExternalSource>()
         val broker = MoviesBroker(tmdb = tmdb, omdb = omdb)
 
-        coEvery { tmdb.getMovieDetails("Inception") } throws Exception("not found")
+        coEvery { tmdb.getMovieByTitle("Inception") } throws Exception("not found")
         coEvery { omdb.getMovieByTitle("Inception") } returns omdbMovie()
 
-        val result = broker.getMovieDetails("Inception")
+        val result = broker.getMovieByTitle("Inception")
 
-        assertEquals(omdbMovie().copy(overview = "A thief who steals corporate secrets through the use of dream-sharing technology. OMDB"), result)
+        assertEquals(omdbMovie().copy(overview = "OMDB:" + omdbMovie().overview), result)
     }
 
     @Test
-    fun `getMovieDetails throws when neither TMDB nor OMDB return data`() = runTest {
-        val tmdb = mockk<RemoteMoviesDataSource>()
-        val omdb = mockk<SingleMovieExternalSource>()
+    fun `getMovieDetails returns null when neither TMDB nor OMDB return data`() = runTest {
+        val tmdb = mockk<MovieDetailExternalSource>()
+        val omdb = mockk<MovieDetailExternalSource>()
         val broker = MoviesBroker(tmdb = tmdb, omdb = omdb)
 
-        coEvery { tmdb.getMovieDetails("Unknown") } throws Exception("not found")
+        coEvery { tmdb.getMovieByTitle("Unknown") } returns null
         coEvery { omdb.getMovieByTitle("Unknown") } returns null
 
-        val exception = assertFailsWith<Exception> {
-            broker.getMovieDetails("Unknown")
-        }
+        val result = broker.getMovieByTitle("Unknown")
 
-        assertEquals("Movie not found: Unknown", exception.message)
+        assertNull(result)
     }
 }
 
