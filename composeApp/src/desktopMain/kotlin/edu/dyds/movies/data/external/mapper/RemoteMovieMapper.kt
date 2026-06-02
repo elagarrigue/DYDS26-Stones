@@ -1,6 +1,6 @@
 package edu.dyds.movies.data.external.mapper
 
-import edu.dyds.movies.data.external.model.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
 import edu.dyds.movies.domain.entity.Movie
 
 fun RemoteMovie.toDomainMovie(): Movie {

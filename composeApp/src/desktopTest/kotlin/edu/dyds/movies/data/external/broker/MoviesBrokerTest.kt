@@ -1,6 +1,6 @@
 package edu.dyds.movies.data.external.broker
 
-import edu.dyds.movies.data.external.model.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
 import edu.dyds.movies.data.remote.MovieDetailExternalSource
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -96,7 +96,7 @@ class MoviesBrokerTest {
         val omdb = mockk<MovieDetailExternalSource>()
         val broker = MoviesBroker(tmdb = tmdb, omdb = omdb)
 
-        coEvery { tmdb.getMovieByTitle("Inception") } throws Exception("not found")
+        coEvery { tmdb.getMovieByTitle("Inception") } returns null
         coEvery { omdb.getMovieByTitle("Inception") } returns omdbMovie()
 
         val result = broker.getMovieByTitle("Inception")

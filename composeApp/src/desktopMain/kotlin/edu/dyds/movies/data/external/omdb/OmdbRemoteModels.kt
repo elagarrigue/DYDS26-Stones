@@ -1,6 +1,6 @@
 package edu.dyds.movies.data.external.omdb
 
-import edu.dyds.movies.data.external.model.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -16,10 +16,16 @@ data class OmdbRemoteMovie(
     @SerialName("imdbRating") val imdbRating: String = "0",
     @SerialName("imdbID") val imdbID: String = "",
     @SerialName("Response") val response: String = "False",
+    @SerialName("Error") val error: String = "",
 )
 
 fun OmdbRemoteMovie.toRemoteMovie(): RemoteMovie? {
+
     if (!response.equals("True", ignoreCase = true)) return null
+
+
+    if (title.isBlank() || title.equals("N/A", ignoreCase = true)) return null
+    if (imdbID.isBlank() || imdbID.equals("N/A", ignoreCase = true)) return null
 
     return RemoteMovie(
         id = imdbID.toMovieId(),

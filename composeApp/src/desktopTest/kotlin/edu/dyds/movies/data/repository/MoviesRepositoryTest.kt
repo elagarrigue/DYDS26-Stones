@@ -1,7 +1,7 @@
 package edu.dyds.movies.data.repository
 
-import edu.dyds.movies.data.external.model.RemoteMovie
-import edu.dyds.movies.data.external.model.RemoteResult
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteResult
 import edu.dyds.movies.data.local.MoviesLocalDataSource
 import edu.dyds.movies.data.remote.MovieDetailExternalSource
 import edu.dyds.movies.data.remote.PopularMoviesExternalSource
@@ -148,7 +148,7 @@ class MoviesRepositoryTest {
     fun `getMovieDetail returns null when not cached and remote fails`() = runTest {
         every { localDataSource.getMovieDetail(999) } returns null
         every { localDataSource.getPopularMovies() } returns emptyList()
-        coEvery { movieDetailExternalSource.getMovieByTitle(any()) } throws Exception("Not found")
+        coEvery { movieDetailExternalSource.getMovieByTitle(any()) } returns null
 
         val result = repository.getMovieDetail(999)
 

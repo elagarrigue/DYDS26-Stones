@@ -1,6 +1,6 @@
 package edu.dyds.movies.data.external.broker
 
-import edu.dyds.movies.data.external.model.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
 import edu.dyds.movies.data.remote.MovieDetailExternalSource
 
 class MoviesBroker(
@@ -9,12 +9,7 @@ class MoviesBroker(
 ) : MovieDetailExternalSource {
 
     override suspend fun getMovieByTitle(title: String): RemoteMovie? {
-        val tmdbResult = try {
-            tmdb.getMovieByTitle(title)
-        } catch (_: Exception) {
-            null
-        }
-
+        val tmdbResult = tmdb.getMovieByTitle(title)
         val omdbResult = omdb.getMovieByTitle(title)
 
         return when {
