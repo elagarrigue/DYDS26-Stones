@@ -1,4 +1,4 @@
-package edu.dyds.movies.data.external.mapper
+package edu.dyds.movies.data.external.tmdb.mapper
 
 import edu.dyds.movies.data.external.tmdb.RemoteMovie
 import edu.dyds.movies.domain.entity.Movie

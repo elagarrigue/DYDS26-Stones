@@ -3,8 +3,8 @@ package edu.dyds.movies.data.repository
 import edu.dyds.movies.data.external.tmdb.RemoteMovie
 import edu.dyds.movies.data.external.tmdb.RemoteResult
 import edu.dyds.movies.data.local.MoviesLocalDataSource
-import edu.dyds.movies.data.remote.MovieDetailExternalSource
-import edu.dyds.movies.data.remote.PopularMoviesExternalSource
+import edu.dyds.movies.data.external.MovieDetailExternalSource
+import edu.dyds.movies.data.external.PopularMoviesExternalSource
 import edu.dyds.movies.domain.entity.Movie
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -116,7 +116,7 @@ class MoviesRepositoryTest {
 
         every { localDataSource.getMovieDetail(10) } returns null
         every { localDataSource.getPopularMovies() } returns cachedList
-            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns remoteMovie
+            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns testMovie(10)
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)
@@ -133,7 +133,7 @@ class MoviesRepositoryTest {
 
         every { localDataSource.getMovieDetail(10) } returns null
         every { localDataSource.getPopularMovies() } returns cachedList
-            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns remoteMovie
+            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns testMovie(10)
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)

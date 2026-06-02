@@ -1,7 +1,7 @@
 package edu.dyds.movies.data.external.omdb
 
-import edu.dyds.movies.data.external.tmdb.RemoteMovie
-import edu.dyds.movies.data.remote.MovieDetailExternalSource
+import edu.dyds.movies.data.external.MovieDetailExternalSource
+import edu.dyds.movies.domain.entity.Movie
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.DefaultRequest
@@ -24,9 +24,9 @@ class OMDBMoviesExternalSource(
     },
 ) : MovieDetailExternalSource {
 
-    override suspend fun getMovieByTitle(title: String): RemoteMovie? {
+    override suspend fun getMovieByTitle(title: String): Movie? {
         val response = movieResponseProvider(clientProvider(), title)
-        return response.toRemoteMovie()
+        return response.toDomainMovie()
     }
 }
 

@@ -1,6 +1,6 @@
 package edu.dyds.movies.data.external.omdb
 
-import edu.dyds.movies.data.external.tmdb.RemoteMovie
+import edu.dyds.movies.domain.entity.Movie
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import io.mockk.mockk
@@ -42,13 +42,13 @@ class OMDBMoviesExternalSourceTest {
         val result = source.getMovieByTitle("Inception")
 
         assertEquals(
-            RemoteMovie(
+            Movie(
                 id = 1375666,
                 title = "Inception",
                 overview = "A thief who steals corporate secrets through the use of dream-sharing technology.",
                 releaseDate = "2010",
-                posterPath = "https://example.com/inception.jpg",
-                backdropPath = null,
+                poster = "https://example.com/inception.jpg",
+                backdrop = null,
                 originalTitle = "Inception",
                 originalLanguage = "en",
                 popularity = 0.0,

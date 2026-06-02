@@ -1,7 +1,7 @@
 package edu.dyds.movies.data.external.broker
 
-import edu.dyds.movies.data.external.tmdb.RemoteMovie
-import edu.dyds.movies.data.remote.MovieDetailExternalSource
+import edu.dyds.movies.domain.entity.Movie
+import edu.dyds.movies.data.external.MovieDetailExternalSource
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -15,26 +15,26 @@ import kotlin.test.assertNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class MoviesBrokerTest {
 
-    private fun tmdbMovie() = RemoteMovie(
+    private fun tmdbMovie() = Movie(
         id = 27205,
         title = "Inception",
         overview = "",
         releaseDate = "2010-07-16",
-        posterPath = "",
-        backdropPath = null,
+        poster = "",
+        backdrop = null,
         originalTitle = "Origen",
         originalLanguage = "",
         popularity = 10.0,
         voteAverage = 0.0,
     )
 
-    private fun omdbMovie() = RemoteMovie(
+    private fun omdbMovie() = Movie(
         id = 1375666,
         title = "Inception",
         overview = "A thief who steals corporate secrets through the use of dream-sharing technology.",
         releaseDate = "2010",
-        posterPath = "https://example.com/inception.jpg",
-        backdropPath = "/backdrop.jpg",
+        poster = "https://example.com/inception.jpg",
+        backdrop = "/backdrop.jpg",
         originalTitle = "Inception",
         originalLanguage = "en",
         popularity = 80.0,
@@ -60,13 +60,13 @@ class MoviesBrokerTest {
         val result = broker.getMovieByTitle("Inception")
 
         assertEquals(
-            RemoteMovie(
+            Movie(
                 id = 27205,
                 title = "Inception",
                 overview = "TMDB: A science-fantasy heist set in dreams. | OMDB: A thief who steals corporate secrets through the use of dream-sharing technology.",
                 releaseDate = "2010-07-16",
-                posterPath = "https://example.com/inception.jpg",
-                backdropPath = "/backdrop.jpg",
+                poster = "https://example.com/inception.jpg",
+                backdrop = "/backdrop.jpg",
                 originalTitle = "Origen",
                 originalLanguage = "en",
                 popularity = 10.0,
@@ -87,7 +87,7 @@ class MoviesBrokerTest {
 
         val result = broker.getMovieByTitle("Inception")
 
-        assertEquals(tmdbMovie().copy(overview = "TMDB:" + tmdbMovie().overview), result)
+        assertEquals(tmdbMovie().copy(overview = "TMDB: " + tmdbMovie().overview), result)
     }
 
     @Test
@@ -101,7 +101,7 @@ class MoviesBrokerTest {
 
         val result = broker.getMovieByTitle("Inception")
 
-        assertEquals(omdbMovie().copy(overview = "OMDB:" + omdbMovie().overview), result)
+        assertEquals(omdbMovie().copy(overview = "OMDB: " + omdbMovie().overview), result)
     }
 
     @Test

@@ -1,6 +1,7 @@
 package edu.dyds.movies.data.external.omdb
 
 import edu.dyds.movies.data.external.tmdb.RemoteMovie
+import edu.dyds.movies.domain.entity.Movie
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -34,6 +35,28 @@ fun OmdbRemoteMovie.toRemoteMovie(): RemoteMovie? {
         releaseDate = year,
         posterPath = poster.takeUnless { it.equals("N/A", ignoreCase = true) }.orEmpty(),
         backdropPath = null,
+        originalTitle = title,
+        originalLanguage = language,
+        popularity = 0.0,
+        voteAverage = imdbRating.toDoubleOrNull() ?: 0.0
+    )
+}
+
+fun OmdbRemoteMovie.toDomainMovie(): Movie? {
+
+    if (!response.equals("True", ignoreCase = true)) return null
+
+    if (title.isBlank() || title.equals("N/A", ignoreCase = true)) return null
+    if (imdbID.isBlank() || imdbID.equals("N/A", ignoreCase = true)) return null
+
+    return Movie(
+        id = imdbID.toMovieId(),
+        title = title,
+        overview = plot,
+        releaseDate = year,
+        // OMDB poster is already a full URL or "N/A"
+        poster = poster.takeUnless { it.equals("N/A", ignoreCase = true) }.orEmpty(),
+        backdrop = null,
         originalTitle = title,
         originalLanguage = language,
         popularity = 0.0,

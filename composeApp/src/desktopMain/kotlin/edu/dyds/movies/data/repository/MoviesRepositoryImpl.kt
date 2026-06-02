@@ -1,9 +1,9 @@
 package edu.dyds.movies.data.repository
 
-import edu.dyds.movies.data.external.mapper.toDomainMovie
+import edu.dyds.movies.data.external.tmdb.mapper.toDomainMovie
 import edu.dyds.movies.data.local.MoviesLocalDataSource
-import edu.dyds.movies.data.remote.MovieDetailExternalSource
-import edu.dyds.movies.data.remote.PopularMoviesExternalSource
+import edu.dyds.movies.data.external.MovieDetailExternalSource
+import edu.dyds.movies.data.external.PopularMoviesExternalSource
 import edu.dyds.movies.domain.entity.Movie
 import edu.dyds.movies.domain.repository.MoviesRepository
 
@@ -38,7 +38,6 @@ class MoviesRepositoryImpl(
 
 			movieTitle?.let {
 				movieDetailExternalSource.getMovieByTitle(it)
-					?.toDomainMovie()
 					?.also { movie -> saveMovieDetail(movie) }
 			}
 		} catch (_: Exception) {
