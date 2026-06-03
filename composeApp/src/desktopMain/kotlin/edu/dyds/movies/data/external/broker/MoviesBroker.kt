@@ -9,15 +9,15 @@ class MoviesBroker(
 ) : MovieDetailExternalSource {
 
     override suspend fun getMovieByTitle(title: String): Movie? {
-        val tmdbResult: edu.dyds.movies.domain.entity.Movie? = tmdb.getMovieByTitle(title)
-        val omdbResult: edu.dyds.movies.domain.entity.Movie? = omdb.getMovieByTitle(title)
+        val tmdbResult: Movie? = tmdb.getMovieByTitle(title)
+        val omdbResult: Movie? = omdb.getMovieByTitle(title)
 
         return when {
             tmdbResult != null && omdbResult != null -> {
                 combineResults(tmdbResult, omdbResult)
             }
             tmdbResult != null -> {
-                edu.dyds.movies.domain.entity.Movie(
+                Movie(
                     id = tmdbResult.id,
                     title = tmdbResult.title,
                     overview = "TMDB: " + tmdbResult.overview,
@@ -31,7 +31,7 @@ class MoviesBroker(
                 )
             }
             omdbResult != null -> {
-                edu.dyds.movies.domain.entity.Movie(
+                Movie(
                     id = omdbResult.id,
                     title = omdbResult.title,
                     overview = "OMDB: " + omdbResult.overview,

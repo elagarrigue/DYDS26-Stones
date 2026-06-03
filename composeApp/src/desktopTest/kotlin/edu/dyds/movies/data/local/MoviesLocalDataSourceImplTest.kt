@@ -60,7 +60,6 @@ class MoviesLocalDataSourceImplTest {
         val local = MoviesLocalDataSourceImpl()
         val m = movie(1)
         local.savePopularMovies(listOf(m))
-        // Popular cache does not imply detail cache.
         local.saveMovieDetail(m, 0)
 
         val retrieved = local.getMovieDetail(1)
