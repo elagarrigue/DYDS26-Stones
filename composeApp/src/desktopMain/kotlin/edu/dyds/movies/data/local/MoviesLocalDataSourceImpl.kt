@@ -4,22 +4,32 @@ import edu.dyds.movies.domain.entity.Movie
 
 class MoviesLocalDataSourceImpl : MoviesLocalDataSource {
 
-	private val cachedMovies = mutableListOf<Movie>()
+	private val cachedPopularMovies = mutableListOf<Movie>()
+	private val cachedMovieDetails = mutableMapOf<Int, Movie>()
 
-	override fun getPopularMovies(): List<Movie> = cachedMovies.toList()
+	override fun getPopularMovies(): List<Movie> = cachedPopularMovies.toList()
 
 	override fun savePopularMovies(movies: List<Movie>) {
-		cachedMovies.clear()
-		cachedMovies.addAll(movies)
+		cachedPopularMovies.clear()
+		cachedPopularMovies.addAll(movies)
+		cachedMovieDetails.clear()
 	}
 
 
 	override fun getMovieDetail(id: Int): Movie? {
-		return cachedMovies.firstOrNull { it.id == id }
+		return cachedMovieDetails[id]
 	}
 
 	override fun saveMovieDetail(movie: Movie, index: Int) {
-		cachedMovies.add(index, movie)
+		cachedMovieDetails[movie.id] = movie
+
+		val existingIndex = cachedPopularMovies.indexOfFirst { it.id == movie.id }
+		if (existingIndex >= 0) {
+			cachedPopularMovies[existingIndex] = movie
+			return
+		}
+
+		cachedPopularMovies.add(index, movie)
 	}
 }
 

@@ -44,8 +44,6 @@ kotlin {
         desktopTest.dependencies {
             implementation(libs.mockk)
         }
-
-        //kotlin.srcDirs("build/generated/ksp/metadata")
     }
 
 }

@@ -1,9 +1,10 @@
 package edu.dyds.movies.data.repository
 
-import edu.dyds.movies.data.external.model.RemoteMovie
-import edu.dyds.movies.data.external.model.RemoteResult
+import edu.dyds.movies.data.external.tmdb.RemoteMovie
+import edu.dyds.movies.data.external.tmdb.RemoteResult
 import edu.dyds.movies.data.local.MoviesLocalDataSource
-import edu.dyds.movies.data.remote.RemoteMoviesDataSource
+import edu.dyds.movies.data.external.MovieDetailExternalSource
+import edu.dyds.movies.data.external.PopularMoviesExternalSource
 import edu.dyds.movies.domain.entity.Movie
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
@@ -21,11 +22,13 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class MoviesRepositoryTest {
 
-    private val remoteDataSource = mockk<RemoteMoviesDataSource>()
+  private val popularMoviesExternalSource = mockk<PopularMoviesExternalSource>()
+  private val movieDetailExternalSource = mockk<MovieDetailExternalSource>()
     private val localDataSource = mockk<MoviesLocalDataSource>()
 
     private val repository = MoviesRepositoryImpl(
-        remoteDataSource = remoteDataSource,
+    popularMoviesExternalSource = popularMoviesExternalSource,
+    movieDetailExternalSource = movieDetailExternalSource,
         localDataSource = localDataSource
     )
 
@@ -76,7 +79,7 @@ class MoviesRepositoryTest {
         val remoteResult = RemoteResult(page = 1, results = remoteMovies, totalPages = 1, totalResults = remoteMovies.size)
 
         every { localDataSource.getPopularMovies() } returns emptyList()
-        coEvery { remoteDataSource.getPopularMovies() } returns remoteResult
+            coEvery { popularMoviesExternalSource.getPopularMovies() } returns remoteResult
         every { localDataSource.savePopularMovies(any()) } returns Unit
 
         val result = repository.getAllMovies()
@@ -89,7 +92,7 @@ class MoviesRepositoryTest {
     @org.junit.Test
     fun `getAllMovies returns empty list when cache is empty and remote fails`() = runTest {
         every { localDataSource.getPopularMovies() } returns emptyList()
-        coEvery { remoteDataSource.getPopularMovies() } throws Exception("Network error")
+        coEvery { popularMoviesExternalSource.getPopularMovies() } throws Exception("Network error")
 
         val result = repository.getAllMovies()
 
@@ -112,8 +115,8 @@ class MoviesRepositoryTest {
         val cachedList = listOf(testMovie(1), testMovie(10))
 
         every { localDataSource.getMovieDetail(10) } returns null
-        coEvery { remoteDataSource.getMovieDetails(10) } returns remoteMovie
         every { localDataSource.getPopularMovies() } returns cachedList
+            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns testMovie(10)
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)
@@ -125,12 +128,12 @@ class MoviesRepositoryTest {
 
     @org.junit.Test
     fun `getMovieDetail returns correct movie when not in cache`() = runTest {
-        val cachedList = listOf(testMovie(1), testMovie(2))
+        val cachedList = listOf(testMovie(1), testMovie(10), testMovie(2))
         val remoteMovie = testRemoteMovie(10)
 
         every { localDataSource.getMovieDetail(10) } returns null
-        coEvery { remoteDataSource.getMovieDetails(10) } returns remoteMovie
         every { localDataSource.getPopularMovies() } returns cachedList
+            coEvery { movieDetailExternalSource.getMovieByTitle("Movie 10") } returns testMovie(10)
         every { localDataSource.saveMovieDetail(any(), any()) } returns Unit
 
         val result = repository.getMovieDetail(10)
@@ -144,7 +147,8 @@ class MoviesRepositoryTest {
     @org.junit.Test
     fun `getMovieDetail returns null when not cached and remote fails`() = runTest {
         every { localDataSource.getMovieDetail(999) } returns null
-        coEvery { remoteDataSource.getMovieDetails(999) } throws Exception("Not found")
+        every { localDataSource.getPopularMovies() } returns emptyList()
+        coEvery { movieDetailExternalSource.getMovieByTitle(any()) } returns null
 
         val result = repository.getMovieDetail(999)
 
